@@ -13,6 +13,7 @@ export default async function HistoryPage() {
       .from('exercises')
       .select('*')
       .or(`user_id.is.null,user_id.eq.${user!.id}`)
+      .eq('is_archived', false)
       .order('category')
       .order('name'),
   ])

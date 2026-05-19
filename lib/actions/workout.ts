@@ -275,3 +275,57 @@ export async function deleteTemplate(templateId: string) {
 
   revalidatePath('/dashboard/templates')
 }
+
+export async function updateExerciseName(id: string, newName: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const { error } = await supabase
+    .from('exercises')
+    .update({ name: newName.trim() })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/templates')
+  revalidatePath('/dashboard/workout')
+  revalidatePath('/dashboard/history')
+}
+
+export async function deleteOrArchiveExercise(id: string): Promise<{ archived: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const [{ count: logCount }, { count: templateCount }] = await Promise.all([
+    supabase.from('workout_logs').select('id', { count: 'exact', head: true }).eq('exercise_id', id),
+    supabase.from('template_exercises').select('id', { count: 'exact', head: true }).eq('exercise_id', id),
+  ])
+
+  const isUsed = (logCount ?? 0) > 0 || (templateCount ?? 0) > 0
+
+  if (isUsed) {
+    const { error } = await supabase.from('exercises').update({ is_archived: true }).eq('id', id)
+    if (error) throw new Error(error.message)
+    revalidatePath('/dashboard/templates')
+    revalidatePath('/dashboard/workout')
+    return { archived: true }
+  }
+
+  const { error } = await supabase.from('exercises').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/templates')
+  revalidatePath('/dashboard/workout')
+  return { archived: false }
+}
+
+export async function restoreExercise(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const { error } = await supabase.from('exercises').update({ is_archived: false }).eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/templates')
+  revalidatePath('/dashboard/workout')
+}

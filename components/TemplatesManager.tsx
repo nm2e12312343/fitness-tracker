@@ -98,12 +98,7 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
   )
 
   return (
-    <div className="animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Vorlagen</h1>
-        <p className="text-zinc-500 text-sm mt-1">Trainingspläne erstellen und verwalten</p>
-      </div>
-
+    <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Vorlagen-Liste */}
         <div className="space-y-3">

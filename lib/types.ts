@@ -3,6 +3,7 @@ export interface Exercise {
   name: string
   category: string
   user_id?: string | null
+  is_archived?: boolean
 }
 
 export interface Workout {
