@@ -301,14 +301,15 @@ export async function deleteOrArchiveExercise(id: string): Promise<{ archived: b
 
   const admin = createAdminClient()
 
-  const [{ count: logCount }, { count: templateCount }] = await Promise.all([
-    admin.from('workout_logs').select('id', { count: 'exact', head: true }).eq('exercise_id', id),
-    admin.from('template_exercises').select('id', { count: 'exact', head: true }).eq('exercise_id', id),
-  ])
+  const { count: logCount } = await admin
+    .from('workout_logs')
+    .select('id', { count: 'exact', head: true })
+    .eq('exercise_id', id)
 
-  const isUsed = (logCount ?? 0) > 0 || (templateCount ?? 0) > 0
+  const hasLogs = (logCount ?? 0) > 0
 
-  if (isUsed) {
+  if (hasLogs) {
+    // Has workout history — soft-archive to keep past logs intact
     const { error } = await admin.from('exercises').update({ is_archived: true }).eq('id', id)
     if (error) throw new Error(error.message)
     revalidatePath('/dashboard/templates')
@@ -316,6 +317,8 @@ export async function deleteOrArchiveExercise(id: string): Promise<{ archived: b
     return { archived: true }
   }
 
+  // No workout logs — remove from any templates first, then hard delete
+  await admin.from('template_exercises').delete().eq('exercise_id', id)
   const { error } = await admin.from('exercises').delete().eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/dashboard/templates')
