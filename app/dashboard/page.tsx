@@ -44,6 +44,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold text-white">Guten Tag, {firstName}</h1>
         <p className="text-zinc-500 mt-1 text-sm">Deine heutige Ubersicht</p>
+        <p className="mt-2 text-xs font-bold text-red-500">TEST-DEPLOY SICHTBAR ✓</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
