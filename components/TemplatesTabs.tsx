@@ -11,15 +11,15 @@ const tabs = [
 
 export default function TemplatesTabs({ activeTab }: Props) {
   return (
-    <div className="flex gap-1 p-1 bg-zinc-900/60 border border-white/5 rounded-lg w-fit">
+    <div className="flex gap-2">
       {tabs.map(t => (
         <Link
           key={t.id}
           href={`?tab=${t.id}`}
-          className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+          className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all ${
             activeTab === t.id
-              ? 'bg-white/10 text-zinc-100'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'bg-[#00f2fe]/15 border-[#00f2fe]/40 text-[#00f2fe]'
+              : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-zinc-100 hover:border-zinc-500'
           }`}
         >
           {t.label}
