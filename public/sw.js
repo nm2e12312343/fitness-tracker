@@ -1,4 +1,4 @@
-const CACHE = 'fittrack-v1';
+const CACHE = 'fittrack-v2';
 
 // Static assets worth caching offline
 const PRECACHE = [
