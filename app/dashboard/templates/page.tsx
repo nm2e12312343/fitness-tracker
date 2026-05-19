@@ -23,7 +23,7 @@ export default async function TemplatesPage({
     const { data } = await supabase
       .from('exercises')
       .select('*')
-      .or(`user_id.is.null,user_id.eq.${user!.id}`)
+      .eq('user_id', user!.id)
       .order('category')
       .order('name')
     exercises = (data as Exercise[]) ?? []
@@ -51,7 +51,7 @@ export default async function TemplatesPage({
       <div>
         <h1 className="text-2xl font-semibold text-white">Vorlagen</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          {isLibrary ? 'Globale Ubungsdatenbank verwalten' : 'Trainingsplane erstellen und verwalten'}
+          {isLibrary ? 'Eigene Ubungen hinzufugen, umbenennen und entfernen' : 'Trainingsplane erstellen und verwalten'}
         </p>
       </div>
 
