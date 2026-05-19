@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2, X, Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { Trash2, X, Plus, LayoutTemplate } from 'lucide-react'
 import {
   createTemplate,
   addExerciseToTemplate,
@@ -28,7 +29,6 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
   )
   const [addExerciseId, setAddExerciseId] = useState('')
   const [isAdding, startAddTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId) ?? null
 
@@ -40,8 +40,9 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
         setSelectedTemplateId(t.id)
         setNewTemplateName('')
         router.refresh()
+        toast.success('Vorlage erstellt')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
+        toast.error(err instanceof Error ? err.message : 'Fehler beim Erstellen')
       }
     })
   }
@@ -54,8 +55,9 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
         await addExerciseToTemplate(selectedTemplateId, addExerciseId, sortOrder)
         setAddExerciseId('')
         router.refresh()
+        toast.success('Übung hinzugefügt')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
+        toast.error(err instanceof Error ? err.message : 'Fehler')
       }
     })
   }
@@ -64,6 +66,7 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
     startAddTransition(async () => {
       await removeExerciseFromTemplate(teId)
       router.refresh()
+      toast.success('Übung entfernt')
     })
   }
 
@@ -72,6 +75,7 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
       await deleteTemplate(id)
       if (selectedTemplateId === id) setSelectedTemplateId(templates.find((t) => t.id !== id)?.id ?? null)
       router.refresh()
+      toast.success('Vorlage gelöscht')
     })
   }
 
@@ -88,14 +92,19 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
         <p className="text-zinc-500 text-sm mt-1">Trainingspläne erstellen und verwalten</p>
       </div>
 
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-400">{error}</div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Vorlagen-Liste */}
         <div className="space-y-3">
           <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Meine Vorlagen</div>
+
+          {templates.length === 0 && (
+            <div className="flex flex-col items-center py-6 gap-3 rounded-xl border border-white/5 bg-black/40 backdrop-blur-xl">
+              <div className="p-2.5 rounded-full bg-white/3 border border-white/8">
+                <LayoutTemplate className="w-5 h-5 text-zinc-600" />
+              </div>
+              <p className="text-xs text-zinc-600">Noch keine Vorlagen</p>
+            </div>
+          )}
 
           {templates.map((t) => (
             <div
@@ -104,16 +113,16 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
               className={`group flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all backdrop-blur-xl ${
                 selectedTemplateId === t.id
                   ? 'bg-[#00f2fe]/8 border-[#00f2fe]/30 text-white'
-                  : 'bg-black/30 border-white/5 text-zinc-400 hover:border-white/10 hover:text-zinc-200'
+                  : 'bg-black/40 border-white/5 text-zinc-400 hover:border-white/10 hover:text-zinc-200'
               }`}
             >
               <span className="text-sm font-medium">{t.name}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-600">{t.template_exercises?.length ?? 0} Ubungen</span>
+                <span className="text-xs text-zinc-600">{t.template_exercises?.length ?? 0} Übungen</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id) }}
                   className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-all p-1 rounded"
-                  title="Vorlage loschen"
+                  title="Vorlage löschen"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -145,8 +154,11 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
         {/* Übungen in Vorlage */}
         <div className="lg:col-span-2">
           {!selectedTemplate ? (
-            <div className="flex items-center justify-center h-40 text-zinc-700 text-sm border border-white/5 rounded-xl bg-black/20 backdrop-blur-xl">
-              Wahle oder erstelle eine Vorlage
+            <div className="flex flex-col items-center justify-center h-40 gap-3 border border-white/5 rounded-xl bg-black/40 backdrop-blur-xl">
+              <div className="p-3 rounded-full bg-white/3 border border-white/8">
+                <LayoutTemplate className="w-5 h-5 text-zinc-600" />
+              </div>
+              <p className="text-sm text-zinc-600">Vorlage auswählen oder erstellen</p>
             </div>
           ) : (
             <div className={`${GLASS} overflow-hidden`}>
@@ -166,14 +178,17 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                       <button
                         onClick={() => handleRemoveExercise(te.id)}
                         className="text-zinc-600 hover:text-red-400 transition-colors p-1 rounded"
-                        title="Ubung entfernen"
+                        title="Übung entfernen"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 {(selectedTemplate.template_exercises ?? []).length === 0 && (
-                  <div className="px-5 py-6 text-zinc-700 text-sm">Noch keine Ubungen hinzugefugt.</div>
+                  <div className="flex flex-col items-center justify-center py-8 gap-2">
+                    <p className="text-sm text-zinc-600">Noch keine Übungen</p>
+                    <p className="text-xs text-zinc-700">Übung unten auswählen und hinzufügen</p>
+                  </div>
                 )}
               </div>
 
@@ -183,7 +198,7 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                   onChange={(e) => setAddExerciseId(e.target.value)}
                   className="flex-1 bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none"
                 >
-                  <option value="">Ubung hinzufugen...</option>
+                  <option value="">Übung hinzufügen...</option>
                   {Object.entries(groupedExercises).map(([category, exs]) => (
                     <optgroup key={category} label={category}>
                       {exs.map((ex) => (
@@ -197,7 +212,7 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                   disabled={isAdding || !addExerciseId}
                   className="bg-white/8 hover:bg-white/12 disabled:opacity-40 text-zinc-200 text-sm px-4 py-2 rounded-lg transition-colors border border-white/5"
                 >
-                  Hinzufugen
+                  Hinzufügen
                 </button>
               </div>
             </div>

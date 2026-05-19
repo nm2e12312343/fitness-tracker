@@ -4,6 +4,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend,
 } from 'recharts'
+import { TrendingUp } from 'lucide-react'
 import type { VolumeChartPoint } from '@/lib/types'
 
 interface Props {
@@ -26,8 +27,11 @@ const TOOLTIP_STYLE = {
 export default function VolumeChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-zinc-600 text-sm">
-        Noch keine Trainingsdaten
+      <div className="flex flex-col items-center justify-center h-48 gap-2.5">
+        <div className="p-2.5 rounded-full bg-white/3 border border-white/8">
+          <TrendingUp className="w-5 h-5 text-zinc-700" />
+        </div>
+        <p className="text-xs text-zinc-600">Noch keine Trainingsdaten</p>
       </div>
     )
   }

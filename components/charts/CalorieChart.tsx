@@ -3,6 +3,7 @@
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell,
 } from 'recharts'
+import { Flame } from 'lucide-react'
 import type { CalorieChartPoint } from '@/lib/types'
 
 interface Props {
@@ -25,8 +26,11 @@ const TOOLTIP_STYLE = {
 export default function CalorieChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-zinc-600 text-sm">
-        Noch keine Daten
+      <div className="flex flex-col items-center justify-center h-40 gap-2.5">
+        <div className="p-2.5 rounded-full bg-white/3 border border-white/8">
+          <Flame className="w-5 h-5 text-zinc-700" />
+        </div>
+        <p className="text-xs text-zinc-600">Noch keine Daten</p>
       </div>
     )
   }

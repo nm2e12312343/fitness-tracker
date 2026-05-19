@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import {
   saveBodyWeight,
   getCalorieEntriesForDate,
@@ -9,8 +10,11 @@ import {
 } from '@/lib/actions/calories'
 import CalorieChart from '@/components/charts/CalorieChart'
 import WeightChart from '@/components/charts/WeightChart'
-import { Scale, Utensils, Sparkles, Check, Loader2, Pencil, Trash2, X, CalendarDays } from 'lucide-react'
-import type { CalorieEntry, CalorieChartPoint, WeightChartPoint } from '@/lib/types'
+import {
+  Scale, Utensils, Sparkles, Check, Loader2, Pencil, Trash2, X,
+  CalendarDays, Salad, ChevronDown, ChevronUp,
+} from 'lucide-react'
+import type { CalorieEntry, CalorieChartPoint, WeightChartPoint, NutritionItem } from '@/lib/types'
 
 interface CalorieTrackerProps {
   initialEntries: CalorieEntry[]
@@ -36,15 +40,12 @@ export default function CalorieTracker({
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [entries, setEntries] = useState<CalorieEntry[]>(initialEntries)
   const [foodText, setFoodText] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isDateLoading, startDateTransition] = useTransition()
 
   const [bodyWeightInput, setBodyWeightInput] = useState(todayWeight?.toString() ?? '')
-  const [weightSaved, setWeightSaved] = useState(false)
   const [isWeightPending, startWeightTransition] = useTransition()
 
-  // Manual edit mode
   const [editMode, setEditMode] = useState(false)
   const [editKcal, setEditKcal] = useState('')
   const [editProtein, setEditProtein] = useState('')
@@ -52,9 +53,11 @@ export default function CalorieTracker({
   const [editFat, setEditFat] = useState('')
   const [isSavingEdit, startEditTransition] = useTransition()
 
-  // Delete confirmation
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [isDeleting, startDeleteTransition] = useTransition()
+
+  const [lastAnalysis, setLastAnalysis] = useState<NutritionItem[] | null>(null)
+  const [showAnalysis, setShowAnalysis] = useState(false)
 
   const totals = entries.reduce(
     (acc, e) => ({
@@ -72,7 +75,8 @@ export default function CalorieTracker({
     setSelectedDate(date)
     setEditMode(false)
     setDeleteConfirm(false)
-    setError(null)
+    setLastAnalysis(null)
+    setShowAnalysis(false)
     startDateTransition(async () => {
       const data = await getCalorieEntriesForDate(date)
       setEntries(data)
@@ -81,8 +85,9 @@ export default function CalorieTracker({
 
   const handleSubmit = () => {
     if (!foodText.trim() || isPending) return
-    setError(null)
     const submittedText = foodText
+    setLastAnalysis(null)
+    setShowAnalysis(false)
     startTransition(async () => {
       const res = await fetch('/api/track-calories', {
         method: 'POST',
@@ -90,10 +95,18 @@ export default function CalorieTracker({
         body: JSON.stringify({ foodText: submittedText, date: selectedDate }),
       })
       const json = await res.json()
-      if (!res.ok) { setError(json.error ?? 'Fehler'); return }
+      if (!res.ok) {
+        toast.error(json.error ?? 'Analyse fehlgeschlagen')
+        return
+      }
 
       const nutrition = json.nutrition
       setFoodText('')
+      if (nutrition.items?.length) {
+        setLastAnalysis(nutrition.items)
+        setShowAnalysis(true)
+      }
+      toast.success('Analyse abgeschlossen')
 
       setEntries((prev) => [{
         id: crypto.randomUUID(),
@@ -113,8 +126,7 @@ export default function CalorieTracker({
     if (isNaN(w) || w <= 0) return
     startWeightTransition(async () => {
       await saveBodyWeight(w)
-      setWeightSaved(true)
-      setTimeout(() => setWeightSaved(false), 2000)
+      toast.success('Gewicht gespeichert')
     })
   }
 
@@ -137,6 +149,7 @@ export default function CalorieTracker({
       const fresh = await getCalorieEntriesForDate(selectedDate)
       setEntries(fresh)
       setEditMode(false)
+      toast.success('Makros gespeichert')
     })
   }
 
@@ -146,6 +159,7 @@ export default function CalorieTracker({
       await deleteCalorieDay(selectedDate)
       setEntries([])
       setDeleteConfirm(false)
+      toast.success('Einträge gelöscht')
     })
   }
 
@@ -184,7 +198,6 @@ export default function CalorieTracker({
             <Loader2 className="w-4 h-4 animate-spin" /> Lade Daten...
           </div>
         ) : editMode ? (
-          /* Edit-Mode */
           <div className="p-5 space-y-4">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium text-zinc-300">Makros manuell anpassen</span>
@@ -225,7 +238,6 @@ export default function CalorieTracker({
             </button>
           </div>
         ) : (
-          /* Normal-Mode */
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5 border-b border-white/5">
               {[
@@ -272,7 +284,6 @@ export default function CalorieTracker({
           </>
         )}
 
-        {/* Mahlzeiten-Liste */}
         {!editMode && entries.length > 0 && (
           <div className="divide-y divide-white/[0.04]">
             {entries.map((entry) => (
@@ -289,8 +300,14 @@ export default function CalorieTracker({
           </div>
         )}
         {!editMode && entries.length === 0 && !isDateLoading && (
-          <div className="px-4 py-5 text-sm text-zinc-700">
-            Keine Einträge für {formatDateDE(selectedDate)}.
+          <div className="flex flex-col items-center justify-center py-10 gap-3">
+            <div className="p-3 rounded-full bg-white/3 border border-white/8">
+              <Salad className="w-6 h-6 text-zinc-600" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-zinc-500">Noch nichts getrackt</p>
+              <p className="text-xs text-zinc-700 mt-0.5">{formatDateDE(selectedDate)}</p>
+            </div>
           </div>
         )}
       </div>
@@ -318,7 +335,7 @@ export default function CalorieTracker({
             disabled={isWeightPending}
             className="flex items-center gap-1.5 bg-white/8 hover:bg-white/12 disabled:opacity-40 text-zinc-200 text-sm px-4 py-2 rounded-lg transition-colors border border-white/5"
           >
-            {weightSaved ? <><Check className="w-3.5 h-3.5 text-[#00f2fe]" /> Gespeichert</> : 'Speichern'}
+            {isWeightPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Speichern'}
           </button>
         </div>
       </div>
@@ -335,7 +352,7 @@ export default function CalorieTracker({
             value={foodText}
             onChange={(e) => setFoodText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit() }}
-            placeholder="z.B. 200g Hahnchenbrust, 150g Reis, Brokkoli"
+            placeholder="z.B. 200g Hähnchenbrust, 150g Reis, Brokkoli"
             rows={3}
             className="flex-1 bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 rounded-lg px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none resize-none transition-colors"
           />
@@ -357,8 +374,27 @@ export default function CalorieTracker({
           </button>
         </div>
         <p className="text-xs text-zinc-700 mt-2">Cmd+Enter zum Absenden</p>
-        {error && (
-          <div className="mt-3 bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-400">{error}</div>
+
+        {lastAnalysis && lastAnalysis.length > 0 && (
+          <div className="mt-3 bg-white/3 border border-white/8 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setShowAnalysis(!showAnalysis)}
+              className="w-full flex items-center justify-between px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <span className="font-medium">KI-Aufschlüsselung ({lastAnalysis.length} Zutaten)</span>
+              {showAnalysis ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+            {showAnalysis && (
+              <div className="border-t border-white/5 divide-y divide-white/[0.04]">
+                {lastAnalysis.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between px-3 py-1.5">
+                    <span className="text-xs text-zinc-500 truncate flex-1 pr-2">{item.name}</span>
+                    <span className="text-xs text-zinc-400 tabular-nums shrink-0">{item.kcal} kcal</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

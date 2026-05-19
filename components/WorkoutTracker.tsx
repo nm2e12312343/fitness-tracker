@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
+import { toast } from 'sonner'
 import { saveWorkoutSession, getLastWorkoutLog, createCustomExercise, deleteWorkout } from '@/lib/actions/workout'
-import { Plus, Check, StopCircle, Loader2, Timer, X, Trash2, CalendarDays, History } from 'lucide-react'
+import { Plus, Check, StopCircle, Loader2, Timer, X, Trash2, CalendarDays, History, Dumbbell } from 'lucide-react'
 import type { Exercise, WorkoutTemplate } from '@/lib/types'
 
 interface SetRow { id: string; weight: string; reps: string; completed: boolean }
@@ -36,9 +37,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
   const [sessionDate, setSessionDate] = useState(localDate)
   const [seconds, setSeconds] = useState(0)
   const [isSaving, startSaveTransition] = useTransition()
-  const [savedOk, setSavedOk] = useState(false)
   const [cancelConfirm, setCancelConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const [history, setHistory] = useState<WorkoutRecord[]>(initialHistory)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -49,7 +48,6 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
   const [newExCategory, setNewExCategory] = useState('')
   const [isAddingEx, startAddExTransition] = useTransition()
 
-  // Timer
   useEffect(() => {
     if (!activeTemplate) return
     setSeconds(0)
@@ -68,7 +66,6 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
     setActiveTemplate(t)
     setSessionDate(localDate())
     setExerciseSessions(exList.map((ex) => ({ exercise: ex, sets: Array.from({ length: 3 }, makeSet), lastLog: null })))
-    setError(null)
 
     exList.forEach((ex, i) => {
       getLastWorkoutLog(ex.id).then((log) => {
@@ -84,7 +81,6 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
     setActiveTemplate(null)
     setExerciseSessions([])
     setSeconds(0)
-    setError(null)
     setCancelConfirm(false)
   }
 
@@ -119,23 +115,19 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
     })
 
     if (entries.length === 0) {
-      setError('Mindestens einen Satz als erledigt markieren (mit Gewicht und Wiederholungen).')
+      toast.error('Mindestens einen Satz als erledigt markieren (mit Gewicht und Wiederholungen).')
       return
     }
-    setError(null)
 
     startSaveTransition(async () => {
       try {
         await saveWorkoutSession({ splitName: activeTemplate!.name, date: sessionDate, entries })
-        setSavedOk(true)
-        setTimeout(() => {
-          setActiveTemplate(null)
-          setExerciseSessions([])
-          setSeconds(0)
-          setSavedOk(false)
-        }, 1800)
+        toast.success('Workout gespeichert!')
+        setActiveTemplate(null)
+        setExerciseSessions([])
+        setSeconds(0)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
+        toast.error(err instanceof Error ? err.message : 'Fehler beim Speichern')
       }
     })
   }
@@ -146,6 +138,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
       await deleteWorkout(id)
       setHistory((prev) => prev.filter((w) => w.id !== id))
       setDeletingId(null)
+      toast.success('Training gelöscht')
     })
   }
 
@@ -157,8 +150,9 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
         setNewExName('')
         setNewExCategory('')
         setShowAddExercise(false)
+        toast.success('Übung angelegt')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
+        toast.error(err instanceof Error ? err.message : 'Fehler')
       }
     })
   }
@@ -175,12 +169,20 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
         <div className={`${GLASS} p-5`}>
           <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Trainingsvorlage</p>
           {templates.length === 0 ? (
-            <p className="text-sm text-zinc-600">
-              Keine Vorlagen vorhanden.{' '}
-              <a href="/dashboard/templates" className="text-[#00f2fe]/70 hover:text-[#00f2fe] underline transition-colors">
-                Vorlage erstellen
-              </a>
-            </p>
+            <div className="flex flex-col items-center py-8 gap-3">
+              <div className="p-3 rounded-full bg-white/3 border border-white/8">
+                <Dumbbell className="w-6 h-6 text-zinc-600" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-zinc-500">Noch keine Vorlagen</p>
+                <a
+                  href="/dashboard/templates"
+                  className="inline-block mt-2 text-xs font-medium px-3 py-1.5 rounded-lg border border-[#00f2fe]/20 text-[#00f2fe]/70 hover:text-[#00f2fe] hover:border-[#00f2fe]/40 transition-all"
+                >
+                  Vorlage erstellen
+                </a>
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {templates.map((t) => (
@@ -203,12 +205,19 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
         </div>
 
         {/* Trainings-Historie */}
-        {history.length > 0 && (
-          <div className={`${GLASS} overflow-hidden`}>
-            <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
-              <History className="w-4 h-4 text-zinc-600" />
-              <span className="text-sm font-medium text-zinc-300">Trainings-Historie</span>
+        <div className={`${GLASS} overflow-hidden`}>
+          <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
+            <History className="w-4 h-4 text-zinc-600" />
+            <span className="text-sm font-medium text-zinc-300">Trainings-Historie</span>
+          </div>
+          {history.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <div className="p-3 rounded-full bg-white/3 border border-white/8">
+                <History className="w-5 h-5 text-zinc-600" />
+              </div>
+              <p className="text-sm text-zinc-500">Noch kein Training absolviert</p>
             </div>
+          ) : (
             <div className="divide-y divide-white/[0.04]">
               {history.map((w) => (
                 <div key={w.id} className="px-5 py-3 flex items-center justify-between gap-4">
@@ -242,8 +251,8 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Eigene Übung anlegen */}
         <div className={`${GLASS} p-5`}>
@@ -279,15 +288,14 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
   return (
     <div className="animate-fade-in space-y-6">
       {/* Session Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-medium text-[#00f2fe] uppercase tracking-wider">Aktive Session</span>
           </div>
           <h1 className="text-2xl font-semibold text-white">{activeTemplate.name}</h1>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Date picker */}
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl px-3 py-2">
             <CalendarDays className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
             <input
@@ -298,7 +306,6 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
               className="bg-transparent text-sm text-zinc-300 outline-none cursor-pointer"
             />
           </div>
-          {/* Timer */}
           <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl px-4 py-2.5">
             <Timer className="w-3.5 h-3.5 text-zinc-600" />
             <span className="text-xl font-mono font-semibold text-[#00f2fe] tabular-nums">{timerStr}</span>
@@ -309,7 +316,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
       {/* Exercise cards */}
       {exerciseSessions.map((s, exIdx) => (
         <div key={s.exercise.id} className={`${GLASS} overflow-hidden`}>
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
+          <div className="px-4 sm:px-5 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
             <div>
               <span className="font-medium text-white">{s.exercise.name}</span>
               <span className="text-xs text-zinc-600 ml-2">{s.exercise.category}</span>
@@ -322,17 +329,17 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
           </div>
 
           <div>
-            <div className="px-5 pt-3 pb-1 grid grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-2 items-center">
-              <span className="text-[10px] text-zinc-700 uppercase tracking-wider">Satz</span>
-              <span className="text-[10px] text-zinc-700 uppercase tracking-wider text-center">Gewicht (kg)</span>
-              <span className="text-[10px] text-zinc-700 uppercase tracking-wider text-center">Wiederh.</span>
+            <div className="px-4 sm:px-5 pt-3 pb-1 grid grid-cols-[1.75rem_1fr_1fr_2rem] sm:grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-1.5 sm:gap-2 items-center">
+              <span className="text-[10px] text-zinc-700 uppercase tracking-wider">Nr.</span>
+              <span className="text-[10px] text-zinc-700 uppercase tracking-wider text-center">kg</span>
+              <span className="text-[10px] text-zinc-700 uppercase tracking-wider text-center">Wdh.</span>
               <span />
             </div>
             <div className="divide-y divide-white/[0.04]">
               {s.sets.map((row, setIdx) => (
                 <div
                   key={row.id}
-                  className={`px-5 py-2.5 grid grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-2 items-center transition-all ${row.completed ? 'opacity-35 bg-white/[0.02]' : ''}`}
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 grid grid-cols-[1.75rem_1fr_1fr_2rem] sm:grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-1.5 sm:gap-2 items-center transition-all ${row.completed ? 'opacity-35 bg-white/[0.02]' : ''}`}
                 >
                   <span className="text-xs text-zinc-500 font-medium">{setIdx + 1}</span>
                   <input
@@ -341,7 +348,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
                     onChange={(e) => updateSet(exIdx, setIdx, 'weight', e.target.value)}
                     placeholder={s.lastLog ? `${s.lastLog.weight}` : 'kg'}
                     step="0.5" min="0"
-                    className="w-full bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 disabled:cursor-not-allowed rounded-lg px-2 py-1.5 text-sm text-zinc-100 outline-none text-center tabular-nums transition-colors"
+                    className="w-full bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 disabled:cursor-not-allowed rounded-lg px-1.5 sm:px-2 py-1.5 text-sm text-zinc-100 outline-none text-center tabular-nums transition-colors"
                   />
                   <input
                     type="number" disabled={row.completed}
@@ -349,34 +356,30 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
                     onChange={(e) => updateSet(exIdx, setIdx, 'reps', e.target.value)}
                     placeholder={s.lastLog ? `${s.lastLog.reps}` : 'Wdh'}
                     step="1" min="0"
-                    className="w-full bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 disabled:cursor-not-allowed rounded-lg px-2 py-1.5 text-sm text-zinc-100 outline-none text-center tabular-nums transition-colors"
+                    className="w-full bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 disabled:cursor-not-allowed rounded-lg px-1.5 sm:px-2 py-1.5 text-sm text-zinc-100 outline-none text-center tabular-nums transition-colors"
                   />
                   <button
                     onClick={() => toggleDone(exIdx, setIdx)}
-                    className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border flex items-center justify-center transition-all ${
                       row.completed
                         ? 'bg-[#00f2fe]/15 border-[#00f2fe]/40 text-[#00f2fe]'
                         : 'bg-white/5 border-white/10 text-zinc-600 hover:border-[#00f2fe]/30 hover:text-[#00f2fe]/60'
                     }`}
                   >
-                    <Check className="w-3.5 h-3.5" />
+                    <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="px-5 py-3 border-t border-white/5">
+          <div className="px-4 sm:px-5 py-3 border-t border-white/5">
             <button onClick={() => addSet(exIdx)} className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
               <Plus className="w-3.5 h-3.5" /> Satz hinzufügen
             </button>
           </div>
         </div>
       ))}
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-xs text-red-400">{error}</div>
-      )}
 
       {/* Finish */}
       <div className={`${GLASS} p-4 space-y-3`}>
@@ -387,17 +390,11 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
 
         <button
           onClick={handleFinish}
-          disabled={isSaving || savedOk}
-          className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border ${
-            savedOk
-              ? 'bg-[#00f2fe]/10 border-[#00f2fe]/30 text-[#00f2fe]'
-              : 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/15 hover:border-red-500/30'
-          } disabled:opacity-50`}
+          disabled={isSaving}
+          className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/15 hover:border-red-500/30 disabled:opacity-50"
         >
           {isSaving ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Wird gespeichert...</>
-          ) : savedOk ? (
-            <><Check className="w-4 h-4" /> Session gespeichert!</>
           ) : (
             <><StopCircle className="w-4 h-4" /> Workout beenden</>
           )}
