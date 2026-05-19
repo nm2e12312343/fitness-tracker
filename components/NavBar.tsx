@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen, Library } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -19,6 +19,7 @@ const NAV_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard/history', label: 'Logbuch', icon: BookOpen },
   { href: '/dashboard/templates', label: 'Vorlagen', icon: LayoutTemplate },
   { href: '/dashboard/progress', label: 'Progress', icon: TrendingUp },
+  { href: '/dashboard/exercises', label: 'Übungen', icon: Library },
 ]
 
 export default function NavBar({ user }: NavBarProps) {
