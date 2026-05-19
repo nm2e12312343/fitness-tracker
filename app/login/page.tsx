@@ -2,6 +2,8 @@ import ParticlesBackground from '@/components/ParticlesBackground'
 import LoginForm from './LoginForm'
 import { Activity } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default function LoginPage() {
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
