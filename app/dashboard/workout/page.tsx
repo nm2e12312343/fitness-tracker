@@ -1,13 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import WorkoutTracker from '@/components/WorkoutTracker'
-import { getWorkoutHistory } from '@/lib/actions/workout'
 import type { Exercise, WorkoutTemplate } from '@/lib/types'
 
 export default async function WorkoutPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: exercises }, { data: templates }, history] = await Promise.all([
+  const [{ data: exercises }, { data: templates }] = await Promise.all([
     supabase
       .from('exercises')
       .select('*')
@@ -19,14 +18,12 @@ export default async function WorkoutPage() {
       .select('*, template_exercises(*, exercises(*))')
       .eq('user_id', user!.id)
       .order('name'),
-    getWorkoutHistory(),
   ])
 
   return (
     <WorkoutTracker
       exercises={(exercises as Exercise[]) ?? []}
       templates={(templates as WorkoutTemplate[]) ?? []}
-      history={history}
     />
   )
 }

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { localDate } from '@/lib/utils'
+import type { WorkoutDetail } from '@/lib/types'
 
 export async function getLastWorkoutLog(exerciseId: string) {
   const supabase = await createClient()
@@ -29,7 +30,7 @@ export async function saveWorkoutSession(data: {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
-  if (data.entries.length === 0) throw new Error('Keine erledigten Satze zum Speichern')
+  if (data.entries.length === 0) throw new Error('Keine erledigten Sätze zum Speichern')
 
   const workoutDate = data.date ?? localDate()
 
@@ -53,10 +54,11 @@ export async function saveWorkoutSession(data: {
 
   if (logError) throw new Error('Einträge konnten nicht gespeichert werden')
   revalidatePath('/dashboard/workout')
+  revalidatePath('/dashboard/history')
   revalidatePath('/dashboard/progress')
 }
 
-export async function getWorkoutHistory() {
+export async function getFullWorkoutHistory(limit = 100) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -66,7 +68,7 @@ export async function getWorkoutHistory() {
     .select('id, date, split_name, workout_logs(count)')
     .eq('user_id', user.id)
     .order('date', { ascending: false })
-    .limit(30)
+    .limit(limit)
 
   return (data ?? []).map((w) => ({
     id: w.id as string,
@@ -76,19 +78,100 @@ export async function getWorkoutHistory() {
   }))
 }
 
+export async function getWorkoutDetail(workoutId: string): Promise<WorkoutDetail | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('workouts')
+    .select('id, date, split_name, workout_logs(id, exercise_id, weight, reps, sets, exercises(id, name, category))')
+    .eq('id', workoutId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  return data as WorkoutDetail | null
+}
+
+export async function updateWorkoutLog(logId: string, values: { weight: number; reps: number; sets: number }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const { data: log } = await supabase
+    .from('workout_logs')
+    .select('workout_id')
+    .eq('id', logId)
+    .maybeSingle()
+
+  if (!log) throw new Error('Eintrag nicht gefunden')
+
+  const { data: workout } = await supabase
+    .from('workouts')
+    .select('id')
+    .eq('id', log.workout_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!workout) throw new Error('Keine Berechtigung')
+
+  const { error } = await supabase
+    .from('workout_logs')
+    .update({ weight: values.weight, reps: values.reps, sets: values.sets })
+    .eq('id', logId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/history')
+  revalidatePath('/dashboard/progress')
+}
+
+export async function deleteWorkoutLog(logId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const { data: log } = await supabase
+    .from('workout_logs')
+    .select('workout_id')
+    .eq('id', logId)
+    .maybeSingle()
+
+  if (!log) throw new Error('Eintrag nicht gefunden')
+
+  const { data: workout } = await supabase
+    .from('workouts')
+    .select('id')
+    .eq('id', log.workout_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!workout) throw new Error('Keine Berechtigung')
+
+  await supabase.from('workout_logs').delete().eq('id', logId)
+  revalidatePath('/dashboard/history')
+  revalidatePath('/dashboard/progress')
+}
+
 export async function deleteWorkout(workoutId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
 
-  await supabase.from('workout_logs').delete().eq('workout_id', workoutId)
-  await supabase
+  // Verify ownership before touching any rows
+  const { data: workout } = await supabase
     .from('workouts')
-    .delete()
+    .select('id')
     .eq('id', workoutId)
     .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!workout) throw new Error('Training nicht gefunden oder keine Berechtigung')
+
+  await supabase.from('workout_logs').delete().eq('workout_id', workoutId)
+  await supabase.from('workouts').delete().eq('id', workoutId).eq('user_id', user.id)
 
   revalidatePath('/dashboard/workout')
+  revalidatePath('/dashboard/history')
   revalidatePath('/dashboard/progress')
 }
 
@@ -104,7 +187,7 @@ export async function createCustomExercise(name: string, category: string) {
     .select()
     .single()
 
-  if (error) throw new Error('Ubung konnte nicht erstellt werden')
+  if (error) throw new Error('Übung konnte nicht erstellt werden')
   revalidatePath('/dashboard/workout')
   revalidatePath('/dashboard/templates')
   return data
@@ -131,6 +214,16 @@ export async function addExerciseToTemplate(templateId: string, exerciseId: stri
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
 
+  // Verify template belongs to this user
+  const { data: template } = await supabase
+    .from('workout_templates')
+    .select('id')
+    .eq('id', templateId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!template) throw new Error('Vorlage nicht gefunden oder keine Berechtigung')
+
   const { error } = await supabase.from('template_exercises').insert({
     template_id: templateId,
     exercise_id: exerciseId,
@@ -143,6 +236,28 @@ export async function addExerciseToTemplate(templateId: string, exerciseId: stri
 
 export async function removeExerciseFromTemplate(templateExerciseId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  // Get the template_exercise to find its template
+  const { data: te } = await supabase
+    .from('template_exercises')
+    .select('template_id')
+    .eq('id', templateExerciseId)
+    .maybeSingle()
+
+  if (!te) return // nothing to do
+
+  // Verify the template belongs to this user
+  const { data: template } = await supabase
+    .from('workout_templates')
+    .select('id')
+    .eq('id', te.template_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!template) throw new Error('Keine Berechtigung')
+
   await supabase.from('template_exercises').delete().eq('id', templateExerciseId)
   revalidatePath('/dashboard/templates')
 }

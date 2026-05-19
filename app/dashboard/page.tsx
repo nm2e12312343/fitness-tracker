@@ -112,7 +112,7 @@ function StatCard({
   accent: string
 }) {
   return (
-    <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+    <div className={`${GLASS} p-4`}>
       <div className="flex items-baseline gap-1.5">
         <span className={`text-2xl font-semibold ${accent}`}>{value}</span>
         <span className="text-sm text-zinc-600">{unit}</span>

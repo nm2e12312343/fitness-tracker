@@ -85,3 +85,19 @@ export interface VolumeChartPoint {
   volume: number
   oneRM: number
 }
+
+export interface WorkoutLogDetail {
+  id: string
+  exercise_id: string
+  weight: number
+  reps: number
+  sets: number
+  exercises: Exercise | null
+}
+
+export interface WorkoutDetail {
+  id: string
+  date: string
+  split_name: string
+  workout_logs: WorkoutLogDetail[]
+}

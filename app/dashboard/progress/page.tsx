@@ -76,7 +76,7 @@ export default async function ProgressPage() {
 
 function StatCard({ label, value, unit, accent }: { label: string; value: string; unit: string; accent?: string }) {
   return (
-    <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+    <div className={`${GLASS} p-4`}>
       <div className="flex items-baseline gap-1">
         <span className={`text-xl font-semibold ${accent ?? 'text-white'}`}>{value}</span>
         {unit && <span className="text-xs text-zinc-600">{unit}</span>}

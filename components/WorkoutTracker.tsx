@@ -2,60 +2,106 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { toast } from 'sonner'
-import { saveWorkoutSession, getLastWorkoutLog, createCustomExercise, deleteWorkout } from '@/lib/actions/workout'
-import { Plus, Check, StopCircle, Loader2, Timer, X, Trash2, CalendarDays, History, Dumbbell } from 'lucide-react'
+import { saveWorkoutSession, getLastWorkoutLog, createCustomExercise } from '@/lib/actions/workout'
+import { Plus, Check, StopCircle, Loader2, Timer, X, Dumbbell, RotateCcw } from 'lucide-react'
 import type { Exercise, WorkoutTemplate } from '@/lib/types'
 
 interface SetRow { id: string; weight: string; reps: string; completed: boolean }
 interface ExerciseSession { exercise: Exercise; sets: SetRow[]; lastLog: { weight: number; reps: number; sets: number } | null }
-interface WorkoutRecord { id: string; date: string; split_name: string; set_count: number }
+
+interface WorkoutDraft {
+  templateId: string
+  templateName: string
+  exerciseSessions: ExerciseSession[]
+  startedAt: number
+}
 
 interface Props {
   exercises: Exercise[]
   templates: WorkoutTemplate[]
-  history: WorkoutRecord[]
 }
 
 const GLASS = 'bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+const DRAFT_KEY = 'fittrack_workout_draft'
+const DRAFT_TTL = 12 * 60 * 60 * 1000 // 12h — stale drafts are auto-discarded
 
 function localDate() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function formatDateDE(iso: string) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
 function makeSet(): SetRow {
   return { id: crypto.randomUUID(), weight: '', reps: '', completed: false }
 }
 
-export default function WorkoutTracker({ exercises: allExercises, templates, history: initialHistory }: Props) {
+function formatElapsed(ms: number): string {
+  const m = Math.floor(ms / 60000)
+  if (m < 60) return `${m} Min.`
+  return `${Math.floor(m / 60)} Std. ${m % 60} Min.`
+}
+
+export default function WorkoutTracker({ exercises: allExercises, templates }: Props) {
   const [activeTemplate, setActiveTemplate] = useState<WorkoutTemplate | null>(null)
   const [exerciseSessions, setExerciseSessions] = useState<ExerciseSession[]>([])
-  const [sessionDate, setSessionDate] = useState(localDate)
   const [seconds, setSeconds] = useState(0)
+  const [timerActive, setTimerActive] = useState(false)
+  const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null)
   const [isSaving, startSaveTransition] = useTransition()
   const [cancelConfirm, setCancelConfirm] = useState(false)
 
-  const [history, setHistory] = useState<WorkoutRecord[]>(initialHistory)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [isDeletingWorkout, startDeleteTransition] = useTransition()
+  const [pendingDraft, setPendingDraft] = useState<WorkoutDraft | null>(null)
 
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [newExName, setNewExName] = useState('')
   const [newExCategory, setNewExCategory] = useState('')
   const [isAddingEx, startAddExTransition] = useTransition()
 
+  // Load draft on mount
   useEffect(() => {
-    if (!activeTemplate) return
-    setSeconds(0)
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY)
+      if (!saved) return
+      const draft: WorkoutDraft = JSON.parse(saved)
+      if (!draft.templateId || !draft.exerciseSessions?.length) { localStorage.removeItem(DRAFT_KEY); return }
+      if (Date.now() - draft.startedAt > DRAFT_TTL) { localStorage.removeItem(DRAFT_KEY); return }
+      setPendingDraft(draft)
+    } catch {
+      localStorage.removeItem(DRAFT_KEY)
+    }
+  }, [])
+
+  // Autosave active session to localStorage on every set change
+  useEffect(() => {
+    if (!activeTemplate || exerciseSessions.length === 0 || sessionStartedAt === null) return
+    try {
+      const draft: WorkoutDraft = {
+        templateId: activeTemplate.id,
+        templateName: activeTemplate.name,
+        exerciseSessions,
+        startedAt: sessionStartedAt,
+      }
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+    } catch {}
+  }, [activeTemplate, exerciseSessions, sessionStartedAt])
+
+  // Timer
+  useEffect(() => {
+    if (!timerActive) return
     const id = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(id)
-  }, [activeTemplate])
+  }, [timerActive])
 
   const timerStr = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
+
+  const clearSession = () => {
+    setActiveTemplate(null)
+    setExerciseSessions([])
+    setSeconds(0)
+    setTimerActive(false)
+    setSessionStartedAt(null)
+    setCancelConfirm(false)
+    try { localStorage.removeItem(DRAFT_KEY) } catch {}
+  }
 
   const handleSelectTemplate = (t: WorkoutTemplate) => {
     const exList = (t.template_exercises ?? [])
@@ -63,9 +109,13 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
       .map((te) => te.exercises!)
       .filter(Boolean)
 
+    const now = Date.now()
     setActiveTemplate(t)
-    setSessionDate(localDate())
+    setSessionStartedAt(now)
     setExerciseSessions(exList.map((ex) => ({ exercise: ex, sets: Array.from({ length: 3 }, makeSet), lastLog: null })))
+    setSeconds(0)
+    setTimerActive(true)
+    setPendingDraft(null)
 
     exList.forEach((ex, i) => {
       getLastWorkoutLog(ex.id).then((log) => {
@@ -77,11 +127,26 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
     })
   }
 
-  const handleCancelSession = () => {
-    setActiveTemplate(null)
-    setExerciseSessions([])
-    setSeconds(0)
-    setCancelConfirm(false)
+  const handleResumeDraft = () => {
+    if (!pendingDraft) return
+    const template = templates.find((t) => t.id === pendingDraft.templateId)
+    setActiveTemplate(template ?? {
+      id: pendingDraft.templateId,
+      name: pendingDraft.templateName,
+      user_id: '',
+      template_exercises: [],
+    })
+    setExerciseSessions(pendingDraft.exerciseSessions)
+    setSessionStartedAt(pendingDraft.startedAt)
+    const elapsed = Math.floor((Date.now() - pendingDraft.startedAt) / 1000)
+    setSeconds(elapsed)
+    setTimerActive(true)
+    setPendingDraft(null)
+  }
+
+  const handleDiscardDraft = () => {
+    try { localStorage.removeItem(DRAFT_KEY) } catch {}
+    setPendingDraft(null)
   }
 
   const updateSet = (exIdx: number, setIdx: number, field: 'weight' | 'reps', value: string) =>
@@ -121,24 +186,12 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
 
     startSaveTransition(async () => {
       try {
-        await saveWorkoutSession({ splitName: activeTemplate!.name, date: sessionDate, entries })
+        await saveWorkoutSession({ splitName: activeTemplate!.name, entries })
         toast.success('Workout gespeichert!')
-        setActiveTemplate(null)
-        setExerciseSessions([])
-        setSeconds(0)
+        clearSession()
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Fehler beim Speichern')
       }
-    })
-  }
-
-  const handleDeleteWorkout = (id: string) => {
-    if (deletingId !== id) { setDeletingId(id); return }
-    startDeleteTransition(async () => {
-      await deleteWorkout(id)
-      setHistory((prev) => prev.filter((w) => w.id !== id))
-      setDeletingId(null)
-      toast.success('Training gelöscht')
     })
   }
 
@@ -163,8 +216,37 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
       <div className="animate-fade-in space-y-6">
         <div>
           <h1 className="text-2xl font-semibold text-white">Training</h1>
-          <p className="text-zinc-500 text-sm mt-1">Vorlage wählen und Session starten</p>
+          <p className="text-zinc-500 text-sm mt-1">Vorlage wählen — das Training gilt immer für heute</p>
         </div>
+
+        {/* Resume banner */}
+        {pendingDraft && (
+          <div className="bg-[#00f2fe]/5 border border-[#00f2fe]/20 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <RotateCcw className="w-4 h-4 text-[#00f2fe] shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-white">{pendingDraft.templateName} — unterbrochen</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  vor {formatElapsed(Date.now() - pendingDraft.startedAt)} · {pendingDraft.exerciseSessions.length} Übungen
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleResumeDraft}
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-[#00f2fe]/30 bg-[#00f2fe]/10 text-[#00f2fe] hover:bg-[#00f2fe]/15 transition-all"
+              >
+                Fortsetzen
+              </button>
+              <button
+                onClick={handleDiscardDraft}
+                className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+              >
+                Verwerfen
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className={`${GLASS} p-5`}>
           <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Trainingsvorlage</p>
@@ -204,56 +286,6 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
           )}
         </div>
 
-        {/* Trainings-Historie */}
-        <div className={`${GLASS} overflow-hidden`}>
-          <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
-            <History className="w-4 h-4 text-zinc-600" />
-            <span className="text-sm font-medium text-zinc-300">Trainings-Historie</span>
-          </div>
-          {history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 gap-3">
-              <div className="p-3 rounded-full bg-white/3 border border-white/8">
-                <History className="w-5 h-5 text-zinc-600" />
-              </div>
-              <p className="text-sm text-zinc-500">Noch kein Training absolviert</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-white/[0.04]">
-              {history.map((w) => (
-                <div key={w.id} className="px-5 py-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span className="text-xs text-zinc-600 tabular-nums shrink-0">{formatDateDE(w.date)}</span>
-                    <span className="text-sm text-zinc-300 truncate">{w.split_name}</span>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs text-zinc-600">{w.set_count} Sätze</span>
-                    <button
-                      onClick={() => handleDeleteWorkout(w.id)}
-                      disabled={isDeletingWorkout && deletingId === w.id}
-                      className={`flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg border ${
-                        deletingId === w.id
-                          ? 'text-red-400 border-red-500/30 bg-red-500/10'
-                          : 'text-zinc-600 border-transparent hover:text-red-400 hover:border-red-500/20'
-                      } disabled:opacity-50`}
-                    >
-                      {isDeletingWorkout && deletingId === w.id
-                        ? <Loader2 className="w-3 h-3 animate-spin" />
-                        : <Trash2 className="w-3 h-3" />
-                      }
-                      {deletingId === w.id ? 'Löschen?' : ''}
-                    </button>
-                    {deletingId === w.id && (
-                      <button onClick={() => setDeletingId(null)} className="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">
-                        Abbrechen
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Eigene Übung anlegen */}
         <div className={`${GLASS} p-5`}>
           <button
@@ -288,28 +320,14 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
   return (
     <div className="animate-fade-in space-y-6">
       {/* Session Header */}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-[#00f2fe] uppercase tracking-wider">Aktive Session</span>
-          </div>
+          <span className="text-xs font-medium text-[#00f2fe] uppercase tracking-wider block mb-1">Aktive Session</span>
           <h1 className="text-2xl font-semibold text-white">{activeTemplate.name}</h1>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl px-3 py-2">
-            <CalendarDays className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
-            <input
-              type="date"
-              value={sessionDate}
-              max={localDate()}
-              onChange={(e) => e.target.value && setSessionDate(e.target.value)}
-              className="bg-transparent text-sm text-zinc-300 outline-none cursor-pointer"
-            />
-          </div>
-          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl px-4 py-2.5">
-            <Timer className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-xl font-mono font-semibold text-[#00f2fe] tabular-nums">{timerStr}</span>
-          </div>
+        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl px-4 py-2.5">
+          <Timer className="w-3.5 h-3.5 text-zinc-600" />
+          <span className="text-xl font-mono font-semibold text-[#00f2fe] tabular-nums">{timerStr}</span>
         </div>
       </div>
 
@@ -385,7 +403,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
       <div className={`${GLASS} p-4 space-y-3`}>
         <div className="flex items-center justify-between">
           <span className="text-xs text-zinc-500">{totalDone} Satz{totalDone !== 1 ? 'e' : ''} erledigt</span>
-          <span className="text-xs text-zinc-600">{sessionDate !== localDate() ? formatDateDE(sessionDate) : 'Heute'}</span>
+          <span className="text-xs text-zinc-600">{localDate()}</span>
         </div>
 
         <button
@@ -393,11 +411,10 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
           disabled={isSaving}
           className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/15 hover:border-red-500/30 disabled:opacity-50"
         >
-          {isSaving ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Wird gespeichert...</>
-          ) : (
-            <><StopCircle className="w-4 h-4" /> Workout beenden</>
-          )}
+          {isSaving
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird gespeichert...</>
+            : <><StopCircle className="w-4 h-4" /> Workout beenden</>
+          }
         </button>
 
         <div className="border-t border-white/5 pt-3 flex items-center gap-3">
@@ -405,7 +422,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates, his
             <>
               <span className="text-xs text-zinc-500 flex-1">Training abbrechen ohne zu speichern?</span>
               <button
-                onClick={handleCancelSession}
+                onClick={clearSession}
                 className="text-xs font-medium text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-500/25 bg-red-500/10 hover:bg-red-500/15 transition-all"
               >
                 Ja, abbrechen

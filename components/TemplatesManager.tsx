@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Trash2, X, Plus, LayoutTemplate } from 'lucide-react'
+import { Trash2, X, Plus, LayoutTemplate, Search } from 'lucide-react'
 import {
   createTemplate,
   addExerciseToTemplate,
@@ -27,10 +27,21 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     initialTemplates[0]?.id ?? null
   )
-  const [addExerciseId, setAddExerciseId] = useState('')
   const [isAdding, startAddTransition] = useTransition()
 
+  // Exercise search
+  const [exerciseSearch, setExerciseSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId) ?? null
+
+  const categories = [...new Set(exercises.map((ex) => ex.category))].sort()
+
+  const filteredExercises = exercises.filter((ex) => {
+    const matchSearch = ex.name.toLowerCase().includes(exerciseSearch.toLowerCase())
+    const matchCat = !selectedCategory || ex.category === selectedCategory
+    return matchSearch && matchCat
+  })
 
   const handleCreateTemplate = () => {
     if (!newTemplateName.trim()) return
@@ -47,13 +58,12 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
     })
   }
 
-  const handleAddExercise = () => {
-    if (!selectedTemplateId || !addExerciseId) return
+  const handleAddExercise = (exerciseId: string) => {
+    if (!selectedTemplateId) return
     const sortOrder = (selectedTemplate?.template_exercises?.length ?? 0) + 1
     startAddTransition(async () => {
       try {
-        await addExerciseToTemplate(selectedTemplateId, addExerciseId, sortOrder)
-        setAddExerciseId('')
+        await addExerciseToTemplate(selectedTemplateId, exerciseId, sortOrder)
         router.refresh()
         toast.success('Übung hinzugefügt')
       } catch (err) {
@@ -64,9 +74,13 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
 
   const handleRemoveExercise = (teId: string) => {
     startAddTransition(async () => {
-      await removeExerciseFromTemplate(teId)
-      router.refresh()
-      toast.success('Übung entfernt')
+      try {
+        await removeExerciseFromTemplate(teId)
+        router.refresh()
+        toast.success('Übung entfernt')
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Fehler')
+      }
     })
   }
 
@@ -79,11 +93,9 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
     })
   }
 
-  const groupedExercises = exercises.reduce<Record<string, Exercise[]>>((acc, ex) => {
-    if (!acc[ex.category]) acc[ex.category] = []
-    acc[ex.category].push(ex)
-    return acc
-  }, {})
+  const alreadyAdded = new Set(
+    (selectedTemplate?.template_exercises ?? []).map((te) => te.exercise_id)
+  )
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -130,7 +142,6 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
             </div>
           ))}
 
-          {/* Neue Vorlage */}
           <div className="flex gap-2">
             <input
               type="text"
@@ -166,7 +177,8 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                 <span className="font-medium text-white">{selectedTemplate.name}</span>
               </div>
 
-              <div className="divide-y divide-white/5 min-h-[80px]">
+              {/* Current exercises */}
+              <div className="divide-y divide-white/5 min-h-[60px]">
                 {(selectedTemplate.template_exercises ?? [])
                   .sort((a, b) => (a.order_index ?? a.sort_order ?? 0) - (b.order_index ?? b.sort_order ?? 0))
                   .map((te) => (
@@ -177,7 +189,8 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                       </div>
                       <button
                         onClick={() => handleRemoveExercise(te.id)}
-                        className="text-zinc-600 hover:text-red-400 transition-colors p-1 rounded"
+                        disabled={isAdding}
+                        className="text-zinc-600 hover:text-red-400 transition-colors p-1 rounded disabled:opacity-40"
                         title="Übung entfernen"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -185,35 +198,82 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
                     </div>
                   ))}
                 {(selectedTemplate.template_exercises ?? []).length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-8 gap-2">
+                  <div className="flex flex-col items-center justify-center py-6 gap-2">
                     <p className="text-sm text-zinc-600">Noch keine Übungen</p>
-                    <p className="text-xs text-zinc-700">Übung unten auswählen und hinzufügen</p>
+                    <p className="text-xs text-zinc-700">Übungen unten suchen und hinzufügen</p>
                   </div>
                 )}
               </div>
 
-              <div className="px-5 py-4 border-t border-white/5 flex gap-3">
-                <select
-                  value={addExerciseId}
-                  onChange={(e) => setAddExerciseId(e.target.value)}
-                  className="flex-1 bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none"
-                >
-                  <option value="">Übung hinzufügen...</option>
-                  {Object.entries(groupedExercises).map(([category, exs]) => (
-                    <optgroup key={category} label={category}>
-                      {exs.map((ex) => (
-                        <option key={ex.id} value={ex.id}>{ex.name}</option>
-                      ))}
-                    </optgroup>
+              {/* Exercise search + add */}
+              <div className="border-t border-white/5 p-4 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={exerciseSearch}
+                    onChange={(e) => setExerciseSearch(e.target.value)}
+                    placeholder="Übung suchen..."
+                    className="w-full bg-white/5 border border-white/8 focus:border-[#00f2fe]/40 rounded-lg pl-9 pr-3 py-2 text-sm text-zinc-100 outline-none"
+                  />
+                </div>
+
+                {/* Category chips */}
+                <div className="flex gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                      !selectedCategory
+                        ? 'bg-[#00f2fe]/15 border-[#00f2fe]/30 text-[#00f2fe]'
+                        : 'bg-white/5 border-white/8 text-zinc-500 hover:text-zinc-300 hover:border-white/12'
+                    }`}
+                  >
+                    Alle
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                        selectedCategory === cat
+                          ? 'bg-[#00f2fe]/15 border-[#00f2fe]/30 text-[#00f2fe]'
+                          : 'bg-white/5 border-white/8 text-zinc-500 hover:text-zinc-300 hover:border-white/12'
+                      }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
-                </select>
-                <button
-                  onClick={handleAddExercise}
-                  disabled={isAdding || !addExerciseId}
-                  className="bg-white/8 hover:bg-white/12 disabled:opacity-40 text-zinc-200 text-sm px-4 py-2 rounded-lg transition-colors border border-white/5"
-                >
-                  Hinzufügen
-                </button>
+                </div>
+
+                {/* Filtered exercise list */}
+                <div className="max-h-48 overflow-y-auto space-y-0.5">
+                  {filteredExercises.length === 0 ? (
+                    <p className="text-xs text-zinc-600 py-3 text-center">Keine Übungen gefunden</p>
+                  ) : filteredExercises.map((ex) => {
+                    const added = alreadyAdded.has(ex.id)
+                    return (
+                      <button
+                        key={ex.id}
+                        onClick={() => !added && handleAddExercise(ex.id)}
+                        disabled={isAdding || added}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors group ${
+                          added
+                            ? 'opacity-30 cursor-default'
+                            : 'hover:bg-white/5 cursor-pointer'
+                        } disabled:cursor-default`}
+                      >
+                        <span className="text-sm text-zinc-300 group-hover:text-white transition-colors">{ex.name}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs text-zinc-600">{ex.category}</span>
+                          {added
+                            ? <span className="text-[10px] text-zinc-600">bereits drin</span>
+                            : <Plus className="w-3.5 h-3.5 text-zinc-600 group-hover:text-[#00f2fe] transition-colors" />
+                          }
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           )}
