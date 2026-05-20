@@ -45,7 +45,7 @@ export default function NavBar({ user }: NavBarProps) {
                 href={href}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-all border ${
                   active
-                    ? 'bg-white/8 border-white/10 text-white'
+                    ? 'bg-[#00f2fe]/10 border-[#00f2fe]/30 text-[#00f2fe]'
                     : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border-transparent'
                 }`}
               >
