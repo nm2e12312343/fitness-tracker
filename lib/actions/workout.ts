@@ -282,13 +282,17 @@ export async function updateExerciseName(id: string, newName: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
 
-  const admin = createAdminClient()
-  const { error } = await admin
+  const { data: existing } = await supabase.from('exercises').select('user_id').eq('id', id).maybeSingle()
+  if (!existing || existing.user_id !== user.id) throw new Error('Keine Berechtigung')
+
+  const { error } = await supabase
     .from('exercises')
     .update({ name: newName.trim() })
     .eq('id', id)
+    .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/exercises')
   revalidatePath('/dashboard/templates')
   revalidatePath('/dashboard/workout')
   revalidatePath('/dashboard/history')
@@ -299,9 +303,10 @@ export async function deleteOrArchiveExercise(id: string): Promise<{ archived: b
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
 
-  const admin = createAdminClient()
+  const { data: existing } = await supabase.from('exercises').select('user_id').eq('id', id).maybeSingle()
+  if (!existing || existing.user_id !== user.id) throw new Error('Keine Berechtigung')
 
-  const { count: logCount } = await admin
+  const { count: logCount } = await supabase
     .from('workout_logs')
     .select('id', { count: 'exact', head: true })
     .eq('exercise_id', id)
@@ -309,18 +314,18 @@ export async function deleteOrArchiveExercise(id: string): Promise<{ archived: b
   const hasLogs = (logCount ?? 0) > 0
 
   if (hasLogs) {
-    // Has workout history — soft-archive to keep past logs intact
-    const { error } = await admin.from('exercises').update({ is_archived: true }).eq('id', id)
+    const { error } = await supabase.from('exercises').update({ is_archived: true }).eq('id', id).eq('user_id', user.id)
     if (error) throw new Error(error.message)
+    revalidatePath('/dashboard/exercises')
     revalidatePath('/dashboard/templates')
     revalidatePath('/dashboard/workout')
     return { archived: true }
   }
 
-  // No workout logs — remove from any templates first, then hard delete
-  await admin.from('template_exercises').delete().eq('exercise_id', id)
-  const { error } = await admin.from('exercises').delete().eq('id', id)
+  await supabase.from('template_exercises').delete().eq('exercise_id', id)
+  const { error } = await supabase.from('exercises').delete().eq('id', id).eq('user_id', user.id)
   if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/exercises')
   revalidatePath('/dashboard/templates')
   revalidatePath('/dashboard/workout')
   return { archived: false }
@@ -331,9 +336,12 @@ export async function restoreExercise(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
 
-  const admin = createAdminClient()
-  const { error } = await admin.from('exercises').update({ is_archived: false }).eq('id', id)
+  const { data: existing } = await supabase.from('exercises').select('user_id').eq('id', id).maybeSingle()
+  if (!existing || existing.user_id !== user.id) throw new Error('Keine Berechtigung')
+
+  const { error } = await supabase.from('exercises').update({ is_archived: false }).eq('id', id).eq('user_id', user.id)
   if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/exercises')
   revalidatePath('/dashboard/templates')
   revalidatePath('/dashboard/workout')
 }

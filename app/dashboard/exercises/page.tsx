@@ -9,7 +9,7 @@ export default async function ExercisesPage() {
   const { data: exercises } = await supabase
     .from('exercises')
     .select('*')
-    .or(`user_id.is.null,user_id.eq.${user!.id}`)
+    .eq('user_id', user!.id)
     .order('category')
     .order('name')
 

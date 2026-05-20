@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Flame, Dumbbell, LayoutTemplate, TrendingUp, ChevronRight } from 'lucide-react'
+import { Flame, Dumbbell, LayoutTemplate, TrendingUp, ChevronRight, Library } from 'lucide-react'
 import type { CalorieEntry } from '@/lib/types'
 import type { LucideIcon } from 'lucide-react'
 
@@ -78,6 +78,12 @@ export default async function DashboardPage() {
             title: 'Progress',
             desc: 'Kraft & Gewicht im Verlauf',
             icon: TrendingUp,
+          },
+          {
+            href: '/dashboard/exercises',
+            title: 'Übungen',
+            desc: 'Eigene Übungen verwalten',
+            icon: Library,
           },
         ] as { href: string; title: string; desc: string; icon: LucideIcon }[]).map(({ href, title, desc, icon: Icon }) => (
           <Link
