@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react'
 
+// Unregisters any previously installed service workers
 export default function SwRegister() {
   useEffect(() => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
-    navigator.serviceWorker
-      .register('/sw.js', { scope: '/', updateViaCache: 'none' })
-      .then((reg) => reg.update())
-      .catch(() => {/* SW not critical — silently ignore */})
+    if (!('serviceWorker' in navigator)) return
+    navigator.serviceWorker.getRegistrations().then(regs =>
+      regs.forEach(r => r.unregister())
+    )
   }, [])
 
   return null
