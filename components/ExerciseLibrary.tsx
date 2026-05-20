@@ -220,12 +220,18 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
 
       {/* Exercise list */}
       {grouped.length === 0 ? (
-        <div className={`${GLASS} py-12 text-center`}>
-          <p className="text-sm text-zinc-600">
+        <div className={`${GLASS} py-12 text-center px-6`}>
+          <p className="text-sm text-zinc-400 font-medium">
             {activeCount === 0 && !showArchived
-              ? 'Noch keine eigenen Ubungen — fugen Sie jetzt eine hinzu'
-              : 'Keine Ubungen gefunden'}
+              ? 'Noch keine eigenen Übungen'
+              : 'Keine Übungen gefunden'}
           </p>
+          {activeCount === 0 && !showArchived && (
+            <p className="text-xs text-zinc-600 mt-2">
+              Klick auf &quot;Übung hinzufügen&quot; um deine eigene Datenbank aufzubauen.
+              Globale Übungen aus dem Training sind hier nicht sichtbar — nur deine eigenen.
+            </p>
+          )}
         </div>
       ) : (
         <div className={`${GLASS} overflow-hidden`}>
