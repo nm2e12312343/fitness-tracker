@@ -9,7 +9,7 @@ export default async function ExercisesPage() {
   const { data: exercises } = await supabase
     .from('exercises')
     .select('*')
-    .eq('user_id', user!.id)
+    .or(`user_id.is.null,user_id.eq.${user!.id}`)
     .order('category')
     .order('name')
 
@@ -17,9 +17,9 @@ export default async function ExercisesPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-zinc-100">Übungsdatenbank</h1>
-        <p className="text-sm text-zinc-500 mt-1">Eigene Übungen hinzufügen, umbenennen oder entfernen</p>
+        <p className="text-sm text-zinc-500 mt-1">Globale Übungen ansehen · eigene hinzufügen, umbenennen, entfernen</p>
       </div>
-      <ExerciseLibrary initialExercises={(exercises as Exercise[]) ?? []} />
+      <ExerciseLibrary initialExercises={(exercises as Exercise[]) ?? []} userId={user!.id} />
     </div>
   )
 }

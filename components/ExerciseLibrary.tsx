@@ -16,9 +16,10 @@ const CATEGORIES = ['Brust', 'Ruecken', 'Schultern', 'Bizeps', 'Trizeps', 'Beine
 
 interface Props {
   initialExercises: Exercise[]
+  userId: string
 }
 
-export default function ExerciseLibrary({ initialExercises }: Props) {
+export default function ExerciseLibrary({ initialExercises, userId }: Props) {
   const [exercises, setExercises] = useState(initialExercises)
   const [search, setSearch] = useState('')
   const [showArchived, setShowArchived] = useState(false)
@@ -31,8 +32,8 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('Sonstiges')
 
-  const archivedCount = useMemo(() => exercises.filter(e => e.is_archived).length, [exercises])
-  const activeCount = useMemo(() => exercises.filter(e => !e.is_archived).length, [exercises])
+  const archivedCount = useMemo(() => exercises.filter(e => e.is_archived && e.user_id === userId).length, [exercises, userId])
+  const ownCount = useMemo(() => exercises.filter(e => !e.is_archived && e.user_id === userId).length, [exercises, userId])
 
   const filtered = useMemo(() => {
     const base = showArchived
@@ -206,32 +207,22 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
                 : 'bg-zinc-900/60 border-white/8 text-zinc-500 hover:text-zinc-200'
             }`}
           >
-            Archiv ({archivedCount})
+            Mein Archiv ({archivedCount})
           </button>
         )}
       </div>
 
       <p className="text-xs text-zinc-600">
         {showArchived
-          ? `${archivedCount} archivierte Ubungen`
-          : `${activeCount} eigene Ubungen`}
+          ? `${archivedCount} archivierte eigene Übungen`
+          : `${ownCount} eigene · ${exercises.filter(e => !e.is_archived && e.user_id === null).length} global`}
         {search.trim() ? ` · ${filtered.length} gefunden` : ''}
       </p>
 
       {/* Exercise list */}
       {grouped.length === 0 ? (
         <div className={`${GLASS} py-12 text-center px-6`}>
-          <p className="text-sm text-zinc-400 font-medium">
-            {activeCount === 0 && !showArchived
-              ? 'Noch keine eigenen Übungen'
-              : 'Keine Übungen gefunden'}
-          </p>
-          {activeCount === 0 && !showArchived && (
-            <p className="text-xs text-zinc-600 mt-2">
-              Klick auf &quot;Übung hinzufügen&quot; um deine eigene Datenbank aufzubauen.
-              Globale Übungen aus dem Training sind hier nicht sichtbar — nur deine eigenen.
-            </p>
-          )}
+          <p className="text-sm text-zinc-400 font-medium">Keine Übungen gefunden</p>
         </div>
       ) : (
         <div className={`${GLASS} overflow-hidden`}>
@@ -269,7 +260,10 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
                       <span className={`flex-1 text-sm ${ex.is_archived ? 'text-zinc-600 line-through' : 'text-zinc-200'}`}>
                         {ex.name}
                       </span>
-                      {ex.is_archived ? (
+                      {ex.user_id === null && (
+                        <span className="text-[10px] text-zinc-600 px-2 py-0.5 rounded-full border border-zinc-800 shrink-0">global</span>
+                      )}
+                      {ex.user_id === userId && ex.is_archived && (
                         <>
                           <span className="text-[10px] text-zinc-600 px-2 py-0.5 rounded-full border border-zinc-700 shrink-0">
                             archiviert
@@ -283,7 +277,8 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
                         </>
-                      ) : (
+                      )}
+                      {ex.user_id === userId && !ex.is_archived && (
                         <>
                           <button
                             onClick={() => startEdit(ex)}
@@ -301,7 +296,7 @@ export default function ExerciseLibrary({ initialExercises }: Props) {
                                 ? 'text-red-400 bg-red-500/10'
                                 : 'text-zinc-600 hover:text-red-400'
                             }`}
-                            title={deletingId === ex.id ? 'Nochmal klicken zum Bestatigen' : 'Entfernen'}
+                            title={deletingId === ex.id ? 'Nochmal klicken zum Bestätigen' : 'Entfernen'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
