@@ -189,6 +189,7 @@ export async function createCustomExercise(name: string, category: string) {
     .single()
 
   if (error) throw new Error('Übung konnte nicht erstellt werden')
+  revalidatePath('/dashboard/exercises')
   revalidatePath('/dashboard/workout')
   revalidatePath('/dashboard/templates')
   return data
