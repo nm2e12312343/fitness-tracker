@@ -23,7 +23,7 @@ export default async function TemplatesPage({
     const { data } = await supabase
       .from('exercises')
       .select('*')
-      .eq('user_id', user!.id)
+      .or(`user_id.is.null,user_id.eq.${user!.id}`)
       .order('category')
       .order('name')
     exercises = (data as Exercise[]) ?? []
@@ -58,7 +58,7 @@ export default async function TemplatesPage({
       <TemplatesTabs activeTab={activeTab} />
 
       {isLibrary
-        ? <ExerciseLibrary initialExercises={exercises} />
+        ? <ExerciseLibrary initialExercises={exercises} userId={user!.id} />
         : <TemplatesManager exercises={exercises} initialTemplates={templates} />
       }
     </div>
