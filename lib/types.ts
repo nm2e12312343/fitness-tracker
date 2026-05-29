@@ -109,3 +109,19 @@ export interface WorkoutDetail {
   split_name: string
   workout_logs: WorkoutLogDetail[]
 }
+
+export interface Habit {
+  id: string
+  user_id: string
+  name: string
+  color: string
+  emoji: string | null
+  created_at: string
+  is_archived: boolean
+}
+
+export interface HabitWithLogs extends Habit {
+  completedDates: string[]
+  streak: number
+  completedToday: boolean
+}

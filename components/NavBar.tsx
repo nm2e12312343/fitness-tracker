@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen, CheckSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -16,6 +16,7 @@ const NAV_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard/calories', label: 'Kalorien', icon: Flame },
   { href: '/dashboard/workout', label: 'Training', icon: Dumbbell },
   { href: '/dashboard/history', label: 'Logbuch', icon: BookOpen },
+  { href: '/dashboard/habits', label: 'Habits', icon: CheckSquare },
   { href: '/dashboard/templates', label: 'Bibliothek', icon: LayoutTemplate },
   { href: '/dashboard/progress', label: 'Progress', icon: TrendingUp },
 ]

@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Dumbbell, LayoutTemplate, TrendingUp, ArrowUpRight } from 'lucide-react'
+import { Dumbbell, LayoutTemplate, TrendingUp, ArrowUpRight, CheckSquare } from 'lucide-react'
+import { getHabitSummaryToday } from '@/lib/actions/habits'
 import type { CalorieEntry } from '@/lib/types'
 
 // Editorial gym/fitness imagery — high-contrast, dark-friendly
@@ -22,7 +23,7 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [{ data: todayCalories }, { data: recentWorkout }] = await Promise.all([
+  const [{ data: todayCalories }, { data: recentWorkout }, habitSummary] = await Promise.all([
     supabase
       .from('calories')
       .select('*')
@@ -35,6 +36,7 @@ export default async function DashboardPage() {
       .order('date', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    getHabitSummaryToday(),
   ])
 
   const todayTotals = (todayCalories as CalorieEntry[] | null)?.reduce(
@@ -114,6 +116,28 @@ export default async function DashboardPage() {
           img={IMG.training}
           icon={Dumbbell}
         />
+
+        {/* Habits */}
+        <Link
+          href="/dashboard/habits"
+          className="group relative col-span-2 isolate overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 p-6 flex flex-col justify-between transition-colors hover:border-white/20"
+        >
+          <div className="flex items-center justify-between">
+            <CheckSquare className="h-5 w-5 text-white/50" />
+            <ArrowUpRight className="h-4 w-4 text-white/25 transition-colors group-hover:text-white/60" />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-5xl font-bold leading-none tracking-tighter text-white tabular-nums">
+                {habitSummary.done}
+              </span>
+              <span className="text-lg font-medium text-white/30">/ {habitSummary.total}</span>
+            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+              Habits heute
+            </p>
+          </div>
+        </Link>
 
         {/* Bibliothek (breit, Bild) */}
         <NavTile
