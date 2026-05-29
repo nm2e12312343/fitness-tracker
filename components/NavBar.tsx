@@ -1,10 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen, Library } from 'lucide-react'
+import { LayoutDashboard, Flame, Dumbbell, LayoutTemplate, TrendingUp, LogOut, BookOpen } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -17,9 +16,8 @@ const NAV_LINKS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard/calories', label: 'Kalorien', icon: Flame },
   { href: '/dashboard/workout', label: 'Training', icon: Dumbbell },
   { href: '/dashboard/history', label: 'Logbuch', icon: BookOpen },
-  { href: '/dashboard/templates', label: 'Vorlagen', icon: LayoutTemplate },
+  { href: '/dashboard/templates', label: 'Bibliothek', icon: LayoutTemplate },
   { href: '/dashboard/progress', label: 'Progress', icon: TrendingUp },
-  { href: '/dashboard/exercises', label: 'Übungen', icon: Library },
 ]
 
 export default function NavBar({ user }: NavBarProps) {
@@ -33,38 +31,43 @@ export default function NavBar({ user }: NavBarProps) {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-20 bg-black/60 backdrop-blur-2xl border-b border-white/5">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-0.5">
-          <span className="text-sm font-bold text-white tracking-tight mr-4">FitTrack</span>
+    <nav className="fixed left-0 right-0 top-0 z-20 border-b border-white/10 bg-black">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+        <div className="flex items-center gap-1">
+          <span className="mr-6 text-sm font-bold uppercase tracking-[0.2em] text-white">
+            FitTrack
+          </span>
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-all border ${
-                  active
-                    ? 'bg-[#00f2fe]/10 border-[#00f2fe]/30 text-[#00f2fe]'
-                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border-transparent'
+                className={`group relative flex items-center gap-1.5 px-2.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors ${
+                  active ? 'text-white' : 'text-white/45 hover:text-white'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden md:inline">{label}</span>
+                <span
+                  className={`absolute -bottom-px left-2.5 right-2.5 h-px transition-opacity ${
+                    active ? 'bg-[#ccff00] opacity-100' : 'bg-white opacity-0 group-hover:opacity-30'
+                  }`}
+                />
               </Link>
             )
           })}
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-zinc-600 hidden lg:block truncate max-w-[160px]">
+        <div className="flex items-center gap-4">
+          <span className="hidden max-w-[160px] truncate text-[11px] font-medium uppercase tracking-[0.15em] text-white/30 lg:block">
             {user.email}
           </span>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 px-2.5 py-1.5 rounded-md border border-zinc-800 hover:border-zinc-700 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/45 transition-colors hover:text-white"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Abmelden</span>
           </button>
         </div>

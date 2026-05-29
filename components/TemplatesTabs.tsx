@@ -6,23 +6,26 @@ interface Props {
 
 const tabs = [
   { id: 'templates', label: 'Vorlagen' },
-  { id: 'library', label: 'Ubungs-Datenbank' },
+  { id: 'library', label: 'Übungs-Datenbank' },
 ]
 
 export default function TemplatesTabs({ activeTab }: Props) {
   return (
-    <div className="flex gap-2">
-      {tabs.map(t => (
+    <div className="flex gap-1 border-b border-white/10 pb-0">
+      {tabs.map((t) => (
         <Link
           key={t.id}
           href={`?tab=${t.id}`}
-          className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all ${
+          className={`relative px-4 pb-3 text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors ${
             activeTab === t.id
-              ? 'bg-[#00f2fe]/15 border-[#00f2fe]/40 text-[#00f2fe]'
-              : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-zinc-100 hover:border-zinc-500'
+              ? 'text-white'
+              : 'text-white/35 hover:text-white/70'
           }`}
         >
           {t.label}
+          {activeTab === t.id && (
+            <span className="absolute bottom-0 left-0 right-0 h-px bg-[#ccff00]" />
+          )}
         </Link>
       ))}
     </div>

@@ -6,32 +6,54 @@ import { revalidatePath } from 'next/cache'
 import { localDate } from '@/lib/utils'
 import type { WorkoutDetail } from '@/lib/types'
 
-export async function getLastWorkoutLog(exerciseId: string) {
+export async function getLastWorkoutSets(exerciseId: string): Promise<{ weight: number; reps: number }[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) return []
 
-  const { data } = await supabase
+  // Find the most recent workout_id for this exercise
+  const { data: latest } = await supabase
     .from('workout_logs')
-    .select('weight, reps, sets, workouts!inner(user_id, date)')
+    .select('workout_id, workouts!inner(date, user_id)')
     .eq('exercise_id', exerciseId)
     .eq('workouts.user_id', user.id)
     .order('workouts(date)', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  return data
+  if (!latest) return []
+
+  const { data: sets } = await supabase
+    .from('workout_logs')
+    .select('weight, reps, set_number, sets')
+    .eq('exercise_id', exerciseId)
+    .eq('workout_id', latest.workout_id)
+    .order('set_number', { ascending: true })
+
+  if (!sets?.length) return []
+
+  // Backward-compat: old rows have set_number=1 and sets=N (aggregated) — expand them
+  if (sets.length === 1 && (sets[0].sets as number) > 1) {
+    return Array.from({ length: sets[0].sets as number }, () => ({
+      weight: sets[0].weight as number,
+      reps: sets[0].reps as number,
+    }))
+  }
+
+  return sets.map((s) => ({ weight: s.weight as number, reps: s.reps as number }))
 }
 
 export async function saveWorkoutSession(data: {
   splitName: string
   date?: string
-  entries: { exerciseId: string; weight: number; reps: number; sets: number }[]
+  entries: { exerciseId: string; sets: { weight: number; reps: number }[] }[]
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
-  if (data.entries.length === 0) throw new Error('Keine erledigten Sätze zum Speichern')
+
+  const validEntries = data.entries.filter((e) => e.sets.length > 0)
+  if (validEntries.length === 0) throw new Error('Keine erledigten Sätze zum Speichern')
 
   const workoutDate = data.date ?? localDate()
 
@@ -43,16 +65,19 @@ export async function saveWorkoutSession(data: {
 
   if (workoutError || !newWorkout) throw new Error('Workout konnte nicht erstellt werden')
 
-  const { error: logError } = await supabase.from('workout_logs').insert(
-    data.entries.map((e) => ({
+  const rows = validEntries.flatMap((e) =>
+    e.sets.map((s, i) => ({
       workout_id: newWorkout.id,
       exercise_id: e.exerciseId,
-      weight: e.weight,
-      reps: e.reps,
-      sets: e.sets,
+      weight: s.weight,
+      reps: s.reps,
+      sets: 1,
+      set_number: i + 1,
+      is_completed: true,
     }))
   )
 
+  const { error: logError } = await supabase.from('workout_logs').insert(rows)
   if (logError) throw new Error('Einträge konnten nicht gespeichert werden')
   revalidatePath('/dashboard/workout')
   revalidatePath('/dashboard/history')
@@ -86,15 +111,16 @@ export async function getWorkoutDetail(workoutId: string): Promise<WorkoutDetail
 
   const { data } = await supabase
     .from('workouts')
-    .select('id, date, split_name, workout_logs(id, exercise_id, weight, reps, sets, exercises(id, name, category))')
+    .select('id, date, split_name, workout_logs(id, exercise_id, weight, reps, sets, set_number, is_completed, exercises(id, name, category))')
     .eq('id', workoutId)
     .eq('user_id', user.id)
+    .order('set_number', { referencedTable: 'workout_logs', ascending: true })
     .maybeSingle()
 
   return data as WorkoutDetail | null
 }
 
-export async function updateWorkoutLog(logId: string, values: { weight: number; reps: number; sets: number }) {
+export async function updateWorkoutLog(logId: string, values: { weight: number; reps: number }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht authentifiziert')
@@ -118,7 +144,7 @@ export async function updateWorkoutLog(logId: string, values: { weight: number; 
 
   const { error } = await supabase
     .from('workout_logs')
-    .update({ weight: values.weight, reps: values.reps, sets: values.sets })
+    .update({ weight: values.weight, reps: values.reps })
     .eq('id', logId)
 
   if (error) throw new Error(error.message)

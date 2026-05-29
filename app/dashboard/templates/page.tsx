@@ -48,12 +48,14 @@ export default async function TemplatesPage({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Vorlagen</h1>
-        <p className="text-zinc-500 text-sm mt-1">
-          {isLibrary ? 'Eigene Ubungen hinzufugen, umbenennen und entfernen' : 'Trainingsplane erstellen und verwalten'}
+      <header className="border-b border-white/10 pb-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          {isLibrary ? 'Eigene Übungen verwalten' : 'Trainingspläne erstellen'}
         </p>
-      </div>
+        <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
+          Bibliothek.
+        </h1>
+      </header>
 
       <TemplatesTabs activeTab={activeTab} />
 

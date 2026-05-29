@@ -32,12 +32,17 @@ export interface CalorieEntry {
   protein: number
   carbs: number
   fat: number
+  goy_score?: number | null
   created_at?: string
 }
 
 export interface NutritionItem {
   name: string
   kcal: number
+  protein: number
+  carbs: number
+  fat: number
+  goy_score: number
 }
 
 export interface NutritionResult {
@@ -93,6 +98,8 @@ export interface WorkoutLogDetail {
   weight: number
   reps: number
   sets: number
+  set_number: number
+  is_completed: boolean
   exercises: Exercise | null
 }
 

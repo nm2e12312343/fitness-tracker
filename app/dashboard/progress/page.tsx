@@ -4,7 +4,7 @@ import VolumeChart from '@/components/charts/VolumeChart'
 import WeightChart from '@/components/charts/WeightChart'
 import type { VolumeChartPoint } from '@/lib/types'
 
-const GLASS = 'bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
 
 export default async function ProgressPage() {
   const supabase = await createClient()
@@ -47,41 +47,57 @@ export default async function ProgressPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Progress</h1>
-        <p className="text-zinc-500 text-sm mt-1">Letzte 90 Tage</p>
-      </div>
+      <header className="border-b border-white/10 pb-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          Letzte 90 Tage
+        </p>
+        <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
+          Progress.
+        </h1>
+      </header>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Workouts" value={String(totalWorkouts)} unit="" />
         <StatCard label="Gesamtvolumen" value={`${(totalVolume / 1000).toFixed(1)}`} unit="t" />
-        <StatCard label="Bestes 1RM" value={String(maxOneRM)} unit="kg" accent="text-[#00f2fe]" />
-        <StatCard label="Aktuelles Gewicht" value={latestWeight ? String(latestWeight) : '—'} unit={latestWeight ? 'kg' : ''} />
+        <StatCard label="Bestes 1RM" value={String(maxOneRM)} unit="kg" />
+        <StatCard label="Körpergewicht" value={latestWeight ? String(latestWeight) : '—'} unit={latestWeight ? 'kg' : ''} />
       </div>
 
-      <div className={`${GLASS} p-5`}>
-        <div className="text-sm font-medium text-zinc-300 mb-1">Trainingsvolumen & 1RM-Schatzung</div>
-        <p className="text-xs text-zinc-600 mb-4">Gesamtvolumen pro Tag (kg) und geschatztes 1RM nach Epley-Formel</p>
+      <div className={`${CARD} p-6`}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">
+          Trainingsvolumen & 1RM
+        </p>
+        <p className="text-sm font-bold tracking-tight text-white mb-5">
+          Volumen pro Tag & Epley-1RM-Schätzung
+        </p>
         <VolumeChart data={volumeData} />
       </div>
 
-      <div className={`${GLASS} p-5`}>
-        <div className="text-sm font-medium text-zinc-300 mb-1">Korpergewicht</div>
-        <p className="text-xs text-zinc-600 mb-4">Korrelation mit Trainingsvolumen sichtbar machen</p>
+      <div className={`${CARD} p-6`}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">
+          Körpergewicht
+        </p>
+        <p className="text-sm font-bold tracking-tight text-white mb-5">
+          Verlauf in kg
+        </p>
         <WeightChart data={weightHistory} />
       </div>
     </div>
   )
 }
 
-function StatCard({ label, value, unit, accent }: { label: string; value: string; unit: string; accent?: string }) {
+function StatCard({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
-    <div className={`${GLASS} p-4`}>
-      <div className="flex items-baseline gap-1">
-        <span className={`text-xl font-semibold ${accent ?? 'text-white'}`}>{value}</span>
-        {unit && <span className="text-xs text-zinc-600">{unit}</span>}
+    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5 flex flex-col justify-between">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40">
+        {label}
+      </span>
+      <div className="flex items-baseline gap-1.5 mt-3">
+        <span className="text-4xl font-bold leading-none tracking-tighter text-white tabular-nums">
+          {value}
+        </span>
+        {unit && <span className="text-sm font-medium text-white/30">{unit}</span>}
       </div>
-      <div className="text-xs text-zinc-600 mt-0.5">{label}</div>
     </div>
   )
 }

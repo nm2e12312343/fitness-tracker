@@ -57,6 +57,39 @@ export async function saveManualCalorieEntry(
   revalidatePath('/dashboard/calories')
 }
 
+export async function updateCalorieEntry(
+  id: string,
+  values: { food_text: string; total_kcal: number; protein: number; carbs: number; fat: number }
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  const { error } = await supabase
+    .from('calories')
+    .update({
+      food_text: values.food_text,
+      total_kcal: Math.round(values.total_kcal),
+      protein: Math.round(values.protein),
+      carbs: Math.round(values.carbs),
+      fat: Math.round(values.fat),
+    })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error('Fehler beim Aktualisieren')
+  revalidatePath('/dashboard/calories')
+}
+
+export async function deleteCalorieEntry(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht authentifiziert')
+
+  await supabase.from('calories').delete().eq('id', id).eq('user_id', user.id)
+  revalidatePath('/dashboard/calories')
+}
+
 export async function deleteCalorieDay(date: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

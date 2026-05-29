@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
 import SwRegister from '@/components/SwRegister'
+import { Providers } from './providers'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#09090b',
+  themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
@@ -34,23 +35,22 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={`${geist.variable} dark`}>
-      <body className="min-h-screen bg-zinc-950 text-zinc-100 font-sans antialiased">
-        {children}
-        <Toaster
-          position="bottom-right"
-          theme="dark"
-          toastOptions={{
-            style: {
-              background: 'rgba(0,0,0,0.9)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e4e4e7',
-              fontSize: '14px',
-            },
-          }}
-        />
-        <SwRegister />
+    <html lang="de" className={geist.variable} suppressHydrationWarning>
+      <body className="min-h-screen bg-black text-zinc-100 font-sans antialiased">
+        <Providers>
+          {children}
+          <Toaster
+            position="bottom-right"
+            theme="dark"
+            toastOptions={{
+              style: {
+                fontSize: '14px',
+              },
+              className: 'bg-zinc-950 border border-white/10 text-zinc-100',
+            }}
+          />
+          <SwRegister />
+        </Providers>
       </body>
     </html>
   )
