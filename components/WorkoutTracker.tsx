@@ -21,8 +21,8 @@ interface Props {
   templates: WorkoutTemplate[]
 }
 
-const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
-const INPUT = 'w-full bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-2 py-1.5 text-sm text-zinc-100 outline-none text-center tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+const CARD = 'rounded-none border border-chalk/10 bg-rubber'
+const INPUT = 'w-full bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-2 py-1.5 text-sm text-chalk outline-none text-center tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-50'
 const DRAFT_KEY = 'fittrack_workout_draft'
 const DRAFT_TTL = 12 * 60 * 60 * 1000
 
@@ -207,23 +207,23 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
   if (!activeTemplate) {
     return (
       <div className="animate-fade-in space-y-6">
-        <header className="border-b border-white/10 pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+        <header className="border-b border-chalk/10 pb-6">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.3em] text-chalk/40">
             Vorlage wählen — gilt immer für heute
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-            Training.
+          <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+            Training<span className="text-blaze">.</span>
           </h1>
         </header>
 
         {/* Resume banner */}
         {pendingDraft && (
-          <div className="rounded-2xl border border-[#ccff00]/20 bg-[#ccff00]/5 p-5 flex items-center justify-between gap-4 flex-wrap">
+          <div className="rounded-none border border-blaze/20 bg-blaze/5 p-5 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
-              <RotateCcw className="w-4 h-4 text-[#ccff00] shrink-0" />
+              <RotateCcw className="w-4 h-4 text-blaze shrink-0" />
               <div>
-                <p className="text-sm font-bold tracking-tight text-white">{pendingDraft.templateName} — unterbrochen</p>
-                <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/40 mt-0.5">
+                <p className="text-sm font-bold tracking-tight text-chalk">{pendingDraft.templateName} — unterbrochen</p>
+                <p className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/40 mt-0.5">
                   vor {formatElapsed(Date.now() - pendingDraft.startedAt)} · {pendingDraft.exerciseSessions.length} Übungen
                 </p>
               </div>
@@ -231,13 +231,13 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={handleResumeDraft}
-                className="text-[11px] font-bold uppercase tracking-[0.15em] bg-[#ccff00] text-black px-4 py-2 rounded-xl transition-all active:scale-[0.98]"
+                className="text-[11px] font-bold font-mono uppercase tracking-[0.15em] bg-blaze text-black px-4 py-2 rounded-none transition-all active:scale-[0.98]"
               >
                 Fortsetzen
               </button>
               <button
                 onClick={handleDiscardDraft}
-                className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35 hover:text-white transition-colors"
+                className="text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/35 hover:text-chalk transition-colors"
               >
                 Verwerfen
               </button>
@@ -247,19 +247,19 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
 
         {/* Template grid */}
         <div className={`${CARD} p-6`}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-5">
+          <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-5">
             Trainingsvorlage
           </p>
           {templates.length === 0 ? (
             <div className="flex flex-col items-center py-10 gap-3">
-              <div className="p-3 rounded-2xl bg-zinc-900 border border-white/10">
-                <Dumbbell className="w-6 h-6 text-white/30" />
+              <div className="p-3 rounded-none bg-asphalt border border-chalk/10">
+                <Dumbbell className="w-6 h-6 text-chalk/30" />
               </div>
               <div className="text-center">
-                <p className="text-sm text-white/40">Noch keine Vorlagen</p>
+                <p className="text-sm text-chalk/40">Noch keine Vorlagen</p>
                 <a
                   href="/dashboard/templates"
-                  className="inline-block mt-3 text-[11px] font-bold uppercase tracking-[0.15em] bg-[#ccff00] text-black px-4 py-2 rounded-xl transition-all"
+                  className="inline-block mt-3 text-[11px] font-bold font-mono uppercase tracking-[0.15em] bg-blaze text-black px-4 py-2 rounded-none transition-all"
                 >
                   Vorlage erstellen
                 </a>
@@ -271,16 +271,16 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
                 <button
                   key={t.id}
                   onClick={() => handleSelectTemplate(t)}
-                  className="group flex items-center justify-between px-5 py-4 rounded-xl border border-white/10 bg-zinc-900 hover:border-white/30 text-left transition-all"
+                  className="group flex items-center justify-between px-5 py-4 rounded-none border border-chalk/10 bg-asphalt hover:border-chalk/30 text-left transition-all"
                 >
                   <div>
-                    <div className="text-sm font-bold tracking-tight text-white">{t.name}</div>
-                    <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/35 mt-1">
+                    <div className="text-sm font-bold tracking-tight text-chalk">{t.name}</div>
+                    <div className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/35 mt-1">
                       {t.template_exercises?.length ?? 0} Übungen
                     </div>
                   </div>
-                  <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center group-hover:border-[#ccff00]/40 group-hover:bg-[#ccff00]/10 transition-all">
-                    <Timer className="w-4 h-4 text-white/40 group-hover:text-[#ccff00] transition-colors" />
+                  <div className="w-9 h-9 rounded-none bg-press border border-chalk/10 flex items-center justify-center group-hover:border-blaze/40 group-hover:bg-blaze/10 transition-all">
+                    <Timer className="w-4 h-4 text-chalk/40 group-hover:text-blaze transition-colors" />
                   </div>
                 </button>
               ))}
@@ -292,7 +292,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
         <div className={`${CARD} p-6`}>
           <button
             onClick={() => setShowAddExercise(!showAddExercise)}
-            className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/35 hover:text-chalk transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             {showAddExercise ? 'Abbrechen' : 'Eigene Übung anlegen'}
@@ -303,18 +303,18 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
                 type="text" value={newExName}
                 onChange={(e) => setNewExName(e.target.value)}
                 placeholder="Name der Übung"
-                className="flex-1 min-w-0 bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none transition-colors"
+                className="flex-1 min-w-0 bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-3 py-2 text-sm text-chalk outline-none transition-colors"
               />
               <input
                 type="text" value={newExCategory}
                 onChange={(e) => setNewExCategory(e.target.value)}
                 placeholder="Kategorie (z.B. Brust)"
-                className="w-44 bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none transition-colors"
+                className="w-44 bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-3 py-2 text-sm text-chalk outline-none transition-colors"
               />
               <button
                 onClick={handleAddExercise}
                 disabled={isAddingEx || !newExName.trim()}
-                className="bg-[#ccff00] text-black text-sm font-bold px-4 py-2 rounded-lg disabled:opacity-40 transition-colors"
+                className="bg-blaze text-black text-sm font-bold px-4 py-2 rounded-none disabled:opacity-40 transition-colors"
               >
                 Anlegen
               </button>
@@ -331,33 +331,33 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
   return (
     <div className="animate-fade-in space-y-6">
       {/* Session Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap border-b border-white/10 pb-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap border-b border-chalk/10 pb-6">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#ccff00]">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-blaze">
             Aktive Session
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-            {activeTemplate.name}.
+          <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+            {activeTemplate.name}<span className="text-blaze">.</span>
           </h1>
         </div>
-        <div className="flex items-center gap-2 bg-zinc-950 border border-white/10 rounded-xl px-5 py-3">
-          <Timer className="w-3.5 h-3.5 text-white/30" />
-          <span className="text-2xl font-bold font-mono tracking-tighter text-white tabular-nums">{timerStr}</span>
+        <div className="flex items-center gap-2 bg-rubber border border-chalk/10 rounded-none px-5 py-3">
+          <Timer className="w-3.5 h-3.5 text-chalk/30" />
+          <span className="text-2xl font-bold font-mono tracking-tighter text-chalk tabular-nums">{timerStr}</span>
         </div>
       </div>
 
       {/* Exercise cards */}
       {exerciseSessions.map((s, exIdx) => (
         <div key={s.exercise.id} className={`${CARD} overflow-hidden`}>
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
+          <div className="px-5 py-4 border-b border-chalk/5 flex items-center justify-between flex-wrap gap-2">
             <div>
-              <span className="font-bold tracking-tight text-white">{s.exercise.name}</span>
-              <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/35 ml-3">
+              <span className="font-bold tracking-tight text-chalk">{s.exercise.name}</span>
+              <span className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/35 ml-3">
                 {s.exercise.category}
               </span>
             </div>
             {s.lastSets && s.lastSets.length > 0 && (
-              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/30">
+              <span className="text-[11px] font-medium font-mono uppercase tracking-[0.12em] text-chalk/30">
                 Zuletzt: {s.lastSets.length}× · {s.lastSets[0].weight} kg × {s.lastSets[0].reps} Wdh.
               </span>
             )}
@@ -365,18 +365,18 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
 
           <div>
             <div className="px-5 pt-3 pb-1 grid grid-cols-[1.75rem_1fr_1fr_2rem] sm:grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-1.5 sm:gap-2 items-center">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25">Nr.</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25 text-center">kg</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25 text-center">Wdh.</span>
+              <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25">Nr.</span>
+              <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25 text-center">kg</span>
+              <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25 text-center">Wdh.</span>
               <span />
             </div>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-chalk/[0.04]">
               {s.sets.map((row, setIdx) => (
                 <div
                   key={row.id}
                   className={`px-5 py-2 sm:py-2.5 grid grid-cols-[1.75rem_1fr_1fr_2rem] sm:grid-cols-[2.5rem_1fr_1fr_2.5rem] gap-1.5 sm:gap-2 items-center transition-all ${row.completed ? 'opacity-30' : ''}`}
                 >
-                  <span className="text-xs font-bold text-white/40">{setIdx + 1}</span>
+                  <span className="text-xs font-bold text-chalk/40">{setIdx + 1}</span>
                   <input
                     type="number" disabled={row.completed}
                     value={row.weight}
@@ -395,10 +395,10 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
                   />
                   <button
                     onClick={() => toggleDone(exIdx, setIdx)}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border flex items-center justify-center transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-none border flex items-center justify-center transition-all ${
                       row.completed
-                        ? 'bg-[#ccff00] border-[#ccff00] text-black'
-                        : 'bg-zinc-900 border-white/10 text-white/30 hover:border-white/40'
+                        ? 'bg-blaze border-blaze text-black'
+                        : 'bg-asphalt border-chalk/10 text-chalk/30 hover:border-chalk/40'
                     }`}
                   >
                     <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -408,10 +408,10 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
             </div>
           </div>
 
-          <div className="px-5 py-3 border-t border-white/5">
+          <div className="px-5 py-3 border-t border-chalk/5">
             <button
               onClick={() => addSet(exIdx)}
-              className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/30 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/30 hover:text-chalk transition-colors"
             >
               <Plus className="w-3.5 h-3.5" /> Satz hinzufügen
             </button>
@@ -422,16 +422,16 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
       {/* Finish panel */}
       <div className={`${CARD} p-5 space-y-4`}>
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40">
+          <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/40">
             {totalDone} Satz{totalDone !== 1 ? 'e' : ''} erledigt
           </span>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/25">{localDate()}</span>
+          <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25">{localDate()}</span>
         </div>
 
         <button
           onClick={handleFinish}
           disabled={isSaving}
-          className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-[#ccff00] text-black disabled:opacity-50 active:scale-[0.99]"
+          className="w-full py-3.5 rounded-none font-bold text-sm flex items-center justify-center gap-2 transition-all bg-blaze text-black disabled:opacity-50 active:scale-[0.99]"
         >
           {isSaving
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird gespeichert...</>
@@ -439,19 +439,19 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
           }
         </button>
 
-        <div className="border-t border-white/5 pt-4 flex items-center gap-3">
+        <div className="border-t border-chalk/5 pt-4 flex items-center gap-3">
           {cancelConfirm ? (
             <>
-              <span className="text-xs text-white/35 flex-1">Training abbrechen ohne zu speichern?</span>
+              <span className="text-xs text-chalk/35 flex-1">Training abbrechen ohne zu speichern?</span>
               <button
                 onClick={clearSession}
-                className="text-xs font-bold text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-500/25 bg-red-500/10 hover:bg-red-500/15 transition-all"
+                className="text-xs font-bold text-red-400 hover:text-red-300 px-3 py-1.5 rounded-none border border-red-500/25 bg-red-500/10 hover:bg-red-500/15 transition-all"
               >
                 Ja, abbrechen
               </button>
               <button
                 onClick={() => setCancelConfirm(false)}
-                className="text-xs font-semibold text-white/30 hover:text-white transition-colors"
+                className="text-xs font-semibold text-chalk/30 hover:text-chalk transition-colors"
               >
                 Zurück
               </button>
@@ -459,7 +459,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
           ) : (
             <button
               onClick={() => setCancelConfirm(true)}
-              className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 hover:text-white/60 transition-colors"
+              className="flex items-center gap-1.5 text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/30 hover:text-chalk/60 transition-colors"
             >
               <X className="w-3.5 h-3.5" /> Training abbrechen
             </button>

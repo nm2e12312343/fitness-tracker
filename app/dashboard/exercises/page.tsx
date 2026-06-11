@@ -16,8 +16,8 @@ export default async function ExercisesPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-100">Übungsdatenbank</h1>
-        <p className="text-sm text-zinc-500 mt-1">Globale Übungen ansehen · eigene hinzufügen, umbenennen, entfernen</p>
+        <h1 className="font-display text-4xl uppercase leading-none text-chalk">Übungsdatenbank<span className="text-blaze">.</span></h1>
+        <p className="font-mono text-xs text-chalk/45 mt-2">Globale Übungen ansehen · eigene hinzufügen, umbenennen, entfernen</p>
       </div>
       <ExerciseLibrary initialExercises={(exercises as Exercise[]) ?? []} userId={user!.id} />
     </div>

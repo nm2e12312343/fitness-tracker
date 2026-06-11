@@ -20,14 +20,14 @@ function GoogleLoginButton() {
   return (
     <div className="space-y-5">
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-400">
+        <div className="border border-red-500/25 bg-red-500/10 p-3 font-mono text-xs text-red-400">
           Anmeldung fehlgeschlagen. Bitte erneut versuchen.
         </div>
       )}
 
       <button
         onClick={handleGoogleLogin}
-        className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 text-zinc-900 font-medium text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98]"
+        className="flex w-full items-center justify-center gap-3 bg-chalk px-4 py-3 text-sm font-bold text-black transition-all hover:bg-white active:scale-[0.98]"
       >
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -38,7 +38,7 @@ function GoogleLoginButton() {
         Mit Google anmelden
       </button>
 
-      <p className="text-center text-xs text-zinc-600">
+      <p className="text-center font-mono text-[10px] uppercase tracking-[0.15em] text-chalk/25">
         Sicher authentifiziert via Supabase
       </p>
     </div>
@@ -47,7 +47,7 @@ function GoogleLoginButton() {
 
 export default function LoginForm() {
   return (
-    <Suspense fallback={<div className="h-20 animate-pulse bg-zinc-800 rounded-lg" />}>
+    <Suspense fallback={<div className="h-20 animate-pulse bg-press" />}>
       <GoogleLoginButton />
     </Suspense>
   )

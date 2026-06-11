@@ -25,8 +25,8 @@ interface CalorieTrackerProps {
   initialDate: string
 }
 
-const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
-const INPUT = 'bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-3 py-2 text-sm text-zinc-100 outline-none transition-colors'
+const CARD = 'rounded-none border border-chalk/10 bg-rubber'
+const INPUT = 'bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-3 py-2 text-sm text-chalk outline-none transition-colors'
 
 function GoyBarometer({ score }: { score: number }) {
   const [displayScore, setDisplayScore] = useState(0)
@@ -58,7 +58,7 @@ function GoyBarometer({ score }: { score: number }) {
   return (
     <div className={`${CARD} p-5`}>
       <div className="flex flex-col items-center gap-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40">
+        <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40">
           Tages-Goy-Score
         </p>
         <svg viewBox="0 0 180 110" className="w-56 h-auto" fill="none" aria-label={`Goy Score: ${score}`}>
@@ -72,7 +72,7 @@ function GoyBarometer({ score }: { score: number }) {
           </defs>
           <path
             d={`M 20,${CY} A ${R},${R} 0 0,1 160,${CY}`}
-            stroke="rgba(255,255,255,0.06)"
+            stroke="rgba(237,230,216,0.08)"
             strokeWidth="12"
             strokeLinecap="round"
           />
@@ -95,20 +95,20 @@ function GoyBarometer({ score }: { score: number }) {
             fill={tier.color}
             style={{ transition: `cx ${duration} ${easing}, cy ${duration} ${easing}` }}
           />
-          <text x="90" y="68" textAnchor="middle" fill="#f4f4f5"
-            fontSize="28" fontWeight="700" fontFamily="system-ui, -apple-system, sans-serif">
+          <text x="90" y="68" textAnchor="middle" fill="#ede6d8"
+            fontSize="28" fontWeight="700" fontFamily="var(--font-smono), monospace">
             {score}
           </text>
           <text x="90" y="83" textAnchor="middle" fill={tier.color}
-            fontSize="11" fontWeight="700" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.05em">
+            fontSize="11" fontWeight="700" fontFamily="var(--font-smono), monospace" letterSpacing="0.05em">
             {tier.label}
           </text>
-          <text x="14" y="107" textAnchor="middle" fill="rgba(255,255,255,0.25)"
-            fontSize="8" fontFamily="system-ui, -apple-system, sans-serif">Based</text>
-          <text x="166" y="107" textAnchor="middle" fill="rgba(255,255,255,0.25)"
-            fontSize="8" fontFamily="system-ui, -apple-system, sans-serif">Goy</text>
+          <text x="14" y="107" textAnchor="middle" fill="rgba(237,230,216,0.3)"
+            fontSize="8" fontFamily="var(--font-smono), monospace">Based</text>
+          <text x="166" y="107" textAnchor="middle" fill="rgba(237,230,216,0.3)"
+            fontSize="8" fontFamily="var(--font-smono), monospace">Goy</text>
         </svg>
-        <p className="text-xs text-white/30 -mt-1">Ø Verarbeitungsgrad heute</p>
+        <p className="text-xs text-chalk/30 -mt-1">Ø Verarbeitungsgrad heute</p>
       </div>
     </div>
   )
@@ -280,29 +280,29 @@ export default function CalorieTracker({
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <header className="flex items-end justify-between gap-4 flex-wrap border-b border-white/10 pb-6">
+      <header className="flex items-end justify-between gap-4 flex-wrap border-b border-chalk/10 pb-6">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.3em] text-chalk/40">
             KI-gestütztes Nahrungs-Tracking
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-            Kalorien.
+          <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+            Kalorien<span className="text-blaze">.</span>
           </h1>
         </div>
         {/* Datepicker */}
-        <div className="flex items-center gap-2 bg-zinc-950 border border-white/10 rounded-xl px-3 py-2">
-          <CalendarDays className="w-3.5 h-3.5 text-white/30 shrink-0" />
+        <div className="flex items-center gap-2 bg-rubber border border-chalk/10 rounded-none px-3 py-2">
+          <CalendarDays className="w-3.5 h-3.5 text-chalk/30 shrink-0" />
           <input
             type="date"
             value={selectedDate}
             max={initialDate}
             onChange={(e) => e.target.value && handleDateChange(e.target.value)}
-            className="bg-transparent text-sm text-zinc-300 outline-none cursor-pointer"
+            className="bg-transparent text-sm text-chalk/75 outline-none cursor-pointer"
           />
           {!isToday && (
             <button
               onClick={() => handleDateChange(initialDate)}
-              className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/40 hover:text-white transition-colors ml-1"
+              className="text-[10px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/40 hover:text-chalk transition-colors ml-1"
             >
               Heute
             </button>
@@ -315,15 +315,15 @@ export default function CalorieTracker({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setEditingEntry(null)}>
           <div className={`${CARD} p-6 w-full max-w-md mx-4`} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+              <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40">
                 Eintrag bearbeiten
               </p>
-              <button onClick={() => setEditingEntry(null)} className="text-white/30 hover:text-white transition-colors">
+              <button onClick={() => setEditingEntry(null)} className="text-chalk/30 hover:text-chalk transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="mb-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 mb-2">Bezeichnung</p>
+              <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40 mb-2">Bezeichnung</p>
               <input
                 type="text"
                 value={editItemFoodText}
@@ -334,22 +334,22 @@ export default function CalorieTracker({
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {[
-                { label: 'Kalorien', value: editItemKcal, setter: setEditItemKcal, unit: 'kcal', color: 'text-[#00f2fe]' },
-                { label: 'Protein', value: editItemProtein, setter: setEditItemProtein, unit: 'g', color: 'text-violet-400' },
-                { label: 'Carbs', value: editItemCarbs, setter: setEditItemCarbs, unit: 'g', color: 'text-emerald-400' },
-                { label: 'Fett', value: editItemFat, setter: setEditItemFat, unit: 'g', color: 'text-amber-400' },
+                { label: 'Kalorien', value: editItemKcal, setter: setEditItemKcal, unit: 'kcal', color: 'text-blaze' },
+                { label: 'Protein', value: editItemProtein, setter: setEditItemProtein, unit: 'g', color: 'text-chalk' },
+                { label: 'Carbs', value: editItemCarbs, setter: setEditItemCarbs, unit: 'g', color: 'text-chalk/65' },
+                { label: 'Fett', value: editItemFat, setter: setEditItemFat, unit: 'g', color: 'text-chalk/45' },
               ].map(({ label, value, setter, unit, color }) => (
                 <div key={label}>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-2">{label}</p>
+                  <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/40 mb-2">{label}</p>
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
                       value={value}
                       onChange={(e) => setter(e.target.value)}
                       min="0"
-                      className={`w-full bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-2 py-1.5 text-sm font-bold ${color} outline-none text-center transition-colors`}
+                      className={`w-full bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-2 py-1.5 text-sm font-bold ${color} outline-none text-center transition-colors`}
                     />
-                    <span className="text-xs text-white/30">{unit}</span>
+                    <span className="text-xs text-chalk/30">{unit}</span>
                   </div>
                 </div>
               ))}
@@ -357,7 +357,7 @@ export default function CalorieTracker({
             <button
               onClick={handleSaveItemEdit}
               disabled={isSavingItemEdit}
-              className="flex items-center gap-1.5 bg-[#ccff00] text-black text-sm font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50 active:scale-[0.98]"
+              className="flex items-center gap-1.5 bg-blaze text-black text-sm font-bold px-4 py-2 rounded-none transition-all disabled:opacity-50 active:scale-[0.98]"
             >
               {isSavingItemEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               Speichern
@@ -369,43 +369,43 @@ export default function CalorieTracker({
       {/* Tageszusammenfassung */}
       <div className={`${CARD} overflow-hidden`}>
         {isDateLoading ? (
-          <div className="flex items-center justify-center h-24 gap-2 text-white/30 text-sm">
+          <div className="flex items-center justify-center h-24 gap-2 text-chalk/30 text-sm">
             <Loader2 className="w-4 h-4 animate-spin" /> Lade Daten...
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5 border-b border-white/5">
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-chalk/5 border-b border-chalk/5">
               {[
-                { label: 'Kalorien', value: totals.kcal, unit: 'kcal', color: 'text-[#00f2fe]' },
-                { label: 'Protein', value: totals.protein, unit: 'g', color: 'text-violet-400' },
-                { label: 'Carbs', value: totals.carbs, unit: 'g', color: 'text-emerald-400' },
-                { label: 'Fett', value: totals.fat, unit: 'g', color: 'text-amber-400' },
+                { label: 'Kalorien', value: totals.kcal, unit: 'kcal', color: 'text-blaze' },
+                { label: 'Protein', value: totals.protein, unit: 'g', color: 'text-chalk' },
+                { label: 'Carbs', value: totals.carbs, unit: 'g', color: 'text-chalk/65' },
+                { label: 'Fett', value: totals.fat, unit: 'g', color: 'text-chalk/45' },
               ].map(({ label, value, unit, color }) => (
                 <div key={label} className="p-5">
                   <div className="flex items-baseline gap-1">
                     <span className={`text-2xl font-bold tracking-tighter tabular-nums ${color}`}>{value}</span>
-                    <span className="text-xs text-white/30">{unit}</span>
+                    <span className="text-xs text-chalk/30">{unit}</span>
                   </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40 mt-1">{label}</p>
+                  <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40 mt-1">{label}</p>
                 </div>
               ))}
             </div>
-            <div className="px-5 py-2.5 flex items-center gap-3 border-b border-white/5">
+            <div className="px-5 py-2.5 flex items-center gap-3 border-b border-chalk/5">
               {!isToday && (
-                <span className="text-xs text-white/30">{formatDateDE(selectedDate)}</span>
+                <span className="text-xs text-chalk/30">{formatDateDE(selectedDate)}</span>
               )}
               <button
                 onClick={handleDelete}
                 disabled={isDeleting || entries.length === 0}
                 className={`flex items-center gap-1 text-xs transition-colors disabled:opacity-30 ${
-                  deleteConfirm ? 'text-red-400 hover:text-red-300' : 'text-white/30 hover:text-red-400'
+                  deleteConfirm ? 'text-red-400 hover:text-red-300' : 'text-chalk/30 hover:text-red-400'
                 }`}
               >
                 <Trash2 className="w-3 h-3" />
                 {deleteConfirm ? 'Wirklich löschen?' : 'Tag löschen'}
               </button>
               {deleteConfirm && (
-                <button onClick={() => setDeleteConfirm(false)} className="text-xs text-white/20 hover:text-white/50 transition-colors">
+                <button onClick={() => setDeleteConfirm(false)} className="text-xs text-chalk/20 hover:text-chalk/50 transition-colors">
                   Abbrechen
                 </button>
               )}
@@ -414,22 +414,22 @@ export default function CalorieTracker({
         )}
 
         {entries.length > 0 && !isDateLoading && (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-chalk/[0.04]">
             {entries.map((entry) => (
               <div key={entry.id} className="px-5 py-3 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-sm text-zinc-400 truncate">{entry.food_text}</span>
+                  <span className="text-sm text-chalk/60 truncate">{entry.food_text}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs shrink-0">
-                  <span className="text-zinc-300 tabular-nums">{entry.total_kcal} kcal</span>
-                  <span className="text-violet-400 hidden sm:block tabular-nums">{entry.protein}g P</span>
-                  <span className="text-emerald-400 hidden sm:block tabular-nums">{entry.carbs}g C</span>
-                  <span className="text-amber-400 hidden sm:block tabular-nums">{entry.fat}g F</span>
-                  <div className="flex items-center gap-0.5 ml-1 border-l border-white/[0.06] pl-2">
+                  <span className="text-chalk/75 tabular-nums">{entry.total_kcal} kcal</span>
+                  <span className="text-chalk hidden sm:block tabular-nums">{entry.protein}g P</span>
+                  <span className="text-chalk/65 hidden sm:block tabular-nums">{entry.carbs}g C</span>
+                  <span className="text-chalk/45 hidden sm:block tabular-nums">{entry.fat}g F</span>
+                  <div className="flex items-center gap-0.5 ml-1 border-l border-chalk/[0.06] pl-2">
                     <button
                       onClick={() => openItemEdit(entry)}
                       title="Bearbeiten"
-                      className="p-1 text-white/25 hover:text-white transition-colors rounded"
+                      className="p-1 text-chalk/25 hover:text-chalk transition-colors rounded"
                     >
                       <Pencil className="w-3 h-3" />
                     </button>
@@ -438,7 +438,7 @@ export default function CalorieTracker({
                       disabled={isDeletingItem}
                       title={deleteConfirmId === entry.id ? 'Nochmal klicken zum Bestätigen' : 'Löschen'}
                       className={`p-1 transition-colors rounded disabled:opacity-30 ${
-                        deleteConfirmId === entry.id ? 'text-red-400 hover:text-red-300' : 'text-white/25 hover:text-red-400'
+                        deleteConfirmId === entry.id ? 'text-red-400 hover:text-red-300' : 'text-chalk/25 hover:text-red-400'
                       }`}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -451,12 +451,12 @@ export default function CalorieTracker({
         )}
         {entries.length === 0 && !isDateLoading && (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="p-3 rounded-2xl bg-zinc-900 border border-white/10">
-              <Salad className="w-6 h-6 text-white/30" />
+            <div className="p-3 rounded-none bg-asphalt border border-chalk/10">
+              <Salad className="w-6 h-6 text-chalk/30" />
             </div>
             <div className="text-center">
-              <p className="text-sm text-white/40">Noch nichts getrackt</p>
-              <p className="text-xs text-white/20 mt-0.5">{formatDateDE(selectedDate)}</p>
+              <p className="text-sm text-chalk/40">Noch nichts getrackt</p>
+              <p className="text-xs text-chalk/20 mt-0.5">{formatDateDE(selectedDate)}</p>
             </div>
           </div>
         )}
@@ -467,7 +467,7 @@ export default function CalorieTracker({
 
       {/* Körpergewicht */}
       <div className={`${CARD} p-6`}>
-        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-4">
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-4">
           <Scale className="w-3.5 h-3.5" />
           Heutiges Körpergewicht
         </p>
@@ -482,11 +482,11 @@ export default function CalorieTracker({
             min="30"
             className={`w-32 ${INPUT}`}
           />
-          <span className="text-sm text-white/30">kg</span>
+          <span className="text-sm text-chalk/30">kg</span>
           <button
             onClick={handleSaveWeight}
             disabled={isWeightPending}
-            className="flex items-center gap-1.5 bg-zinc-900 border border-white/10 hover:border-white/25 disabled:opacity-40 text-zinc-200 text-sm px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-asphalt border border-chalk/10 hover:border-chalk/25 disabled:opacity-40 text-chalk/85 text-sm px-4 py-2 rounded-none transition-colors"
           >
             {isWeightPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Speichern'}
           </button>
@@ -495,10 +495,10 @@ export default function CalorieTracker({
 
       {/* Essens-Eingabe */}
       <div className={`${CARD} p-6`}>
-        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-4">
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-4">
           <Utensils className="w-3.5 h-3.5" />
           Was hast du gegessen?
-          {!isToday && <span className="ml-1 normal-case font-normal tracking-normal text-white/20">({formatDateDE(selectedDate)})</span>}
+          {!isToday && <span className="ml-1 normal-case font-normal tracking-normal text-chalk/20">({formatDateDE(selectedDate)})</span>}
         </p>
         <div className="flex gap-3">
           <textarea
@@ -507,12 +507,12 @@ export default function CalorieTracker({
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit() }}
             placeholder="z.B. 200g Hähnchenbrust, 150g Reis, Brokkoli"
             rows={3}
-            className="flex-1 bg-zinc-900 border border-white/10 focus:border-white/30 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-white/20 outline-none resize-none transition-colors"
+            className="flex-1 bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-4 py-3 text-sm text-chalk placeholder-chalk/20 outline-none resize-none transition-colors"
           />
           <button
             onClick={handleSubmit}
             disabled={isPending || !foodText.trim()}
-            className="self-end disabled:opacity-30 bg-[#ccff00] text-black text-sm font-bold px-4 py-2.5 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap"
+            className="self-end disabled:opacity-30 bg-blaze text-black text-sm font-bold px-4 py-2.5 rounded-none transition-all active:scale-[0.98] whitespace-nowrap"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
@@ -525,27 +525,27 @@ export default function CalorieTracker({
             )}
           </button>
         </div>
-        <p className="text-[10px] font-medium text-white/20 mt-2 uppercase tracking-[0.15em]">
+        <p className="text-[10px] font-medium text-chalk/20 mt-2 font-mono uppercase tracking-[0.15em]">
           Cmd+Enter zum Absenden
         </p>
 
         {lastAnalysis && lastAnalysis.length > 0 && (
-          <div className="mt-4 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden">
+          <div className="mt-4 bg-asphalt border border-chalk/10 rounded-none overflow-hidden">
             <button
               onClick={() => setShowAnalysis(!showAnalysis)}
-              className="w-full flex items-center justify-between px-4 py-3 text-xs text-white/40 hover:text-white/70 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 text-xs text-chalk/40 hover:text-chalk/70 transition-colors"
             >
-              <span className="font-semibold uppercase tracking-[0.15em]">
+              <span className="font-semibold font-mono uppercase tracking-[0.15em]">
                 KI-Aufschlüsselung ({lastAnalysis.length} Zutaten)
               </span>
               {showAnalysis ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
             {showAnalysis && (
-              <div className="border-t border-white/5 divide-y divide-white/[0.04]">
+              <div className="border-t border-chalk/5 divide-y divide-chalk/[0.04]">
                 {lastAnalysis.map((item, i) => (
                   <div key={i} className="flex items-center justify-between px-4 py-2">
-                    <span className="text-xs text-zinc-500 truncate flex-1 pr-2">{item.name}</span>
-                    <span className="text-xs text-zinc-400 tabular-nums shrink-0">{item.kcal} kcal</span>
+                    <span className="text-xs text-chalk/45 truncate flex-1 pr-2">{item.name}</span>
+                    <span className="text-xs text-chalk/60 tabular-nums shrink-0">{item.kcal} kcal</span>
                   </div>
                 ))}
               </div>
@@ -557,13 +557,13 @@ export default function CalorieTracker({
       {/* 30-Tage Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className={`${CARD} p-6`}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">Kalorien</p>
-          <p className="text-sm font-bold tracking-tight text-white mb-5">Letzte 30 Tage</p>
+          <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">Kalorien</p>
+          <p className="text-sm font-bold tracking-tight text-chalk mb-5">Letzte 30 Tage</p>
           <CalorieChart data={calorieHistory} />
         </div>
         <div className={`${CARD} p-6`}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">Körpergewicht</p>
-          <p className="text-sm font-bold tracking-tight text-white mb-5">Letzte 30 Tage</p>
+          <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">Körpergewicht</p>
+          <p className="text-sm font-bold tracking-tight text-chalk mb-5">Letzte 30 Tage</p>
           <WeightChart data={weightHistory} />
         </div>
       </div>

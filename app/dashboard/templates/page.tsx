@@ -48,12 +48,12 @@ export default async function TemplatesPage({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <header className="border-b border-white/10 pb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+      <header className="border-b border-chalk/15 pb-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-chalk/40">
           {isLibrary ? 'Eigene Übungen verwalten' : 'Trainingspläne erstellen'}
         </p>
-        <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-          Bibliothek.
+        <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+          Bibliothek<span className="text-blaze">.</span>
         </h1>
       </header>
 

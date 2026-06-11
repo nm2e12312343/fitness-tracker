@@ -1,21 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Dumbbell, LayoutTemplate, TrendingUp, ArrowUpRight, CheckSquare } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { getHabitSummaryToday } from '@/lib/actions/habits'
+import Reveal from '@/components/Reveal'
+import CountUp from '@/components/CountUp'
 import type { CalorieEntry } from '@/lib/types'
-
-// Editorial gym/fitness imagery — high-contrast, dark-friendly
-const IMG = {
-  calories:
-    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1400&q=80',
-  training:
-    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=80',
-  library:
-    'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1400&q=80',
-  progress:
-    'https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=1400&q=80',
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -50,175 +39,184 @@ export default async function DashboardPage() {
   ) ?? { kcal: 0, protein: 0, carbs: 0, fat: 0 }
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'Athlet'
+  const dateStr = new Date().toLocaleDateString('de-DE', {
+    weekday: 'long', day: '2-digit', month: 'long',
+  })
+
+  // Macro share of today's energy (4/4/9 kcal per gram)
+  const macroKcal = {
+    protein: todayTotals.protein * 4,
+    carbs: todayTotals.carbs * 4,
+    fat: todayTotals.fat * 9,
+  }
+  const macroSum = macroKcal.protein + macroKcal.carbs + macroKcal.fat
+  const share = (k: number) => (macroSum > 0 ? Math.round((k / macroSum) * 100) : 0)
+
+  const macros = [
+    { label: 'Protein', grams: todayTotals.protein, pct: share(macroKcal.protein), bar: 'bg-blaze' },
+    { label: 'Carbs', grams: todayTotals.carbs, pct: share(macroKcal.carbs), bar: 'bg-chalk/70' },
+    { label: 'Fett', grams: todayTotals.fat, pct: share(macroKcal.fat), bar: 'bg-chalk/35' },
+  ]
+
+  const stations = [
+    { n: '01', href: '/dashboard/calories', label: 'Kalorien', desc: 'KI-Nahrungstracking' },
+    { n: '02', href: '/dashboard/workout', label: 'Training', desc: recentWorkout ? `Zuletzt: ${recentWorkout.split_name}` : 'Workout starten' },
+    { n: '03', href: '/dashboard/history', label: 'Logbuch', desc: 'Vergangene Einheiten' },
+    { n: '04', href: '/dashboard/habits', label: 'Habits', desc: `${habitSummary.done}/${habitSummary.total} heute erledigt` },
+    { n: '05', href: '/dashboard/templates', label: 'Bibliothek', desc: 'Vorlagen & Übungsdatenbank' },
+    { n: '06', href: '/dashboard/progress', label: 'Progress', desc: 'Kraft & Gewicht im Verlauf' },
+  ]
 
   return (
-    <div className="animate-fade-in">
-      {/* Editorial header */}
-      <header className="mb-8 flex items-end justify-between border-b border-white/10 pb-6">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-white/40">
-            Übersicht · Heute
+    <div>
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section data-rail="Heute" className="flex min-h-[62vh] flex-col justify-end pb-14">
+        <Reveal variant="wipe">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-chalk/40">
+            {dateStr} — Übersicht
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white sm:text-5xl">
-            {firstName}.
+          <h1 className="mt-4 font-display text-[clamp(56px,11vw,130px)] uppercase leading-[0.85] text-chalk">
+            Dranbleiben,
+            <br />
+            {firstName}
+            <span className="text-blaze">.</span>
           </h1>
-        </div>
-        <span className="hidden text-[11px] font-medium uppercase tracking-[0.25em] text-white/30 sm:block">
-          {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
-        </span>
-      </header>
+        </Reveal>
+        <Reveal delay={300}>
+          <div className="mt-12 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-chalk/40">
+            <span className="scroll-cue block h-10 w-px bg-blaze" />
+            Scrollen
+          </div>
+        </Reveal>
+      </section>
 
-      {/* Bento grid */}
-      <div className="grid auto-rows-[150px] grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* ── 01 / Bilanz ──────────────────────────────────────────────── */}
+      <section data-rail="Bilanz" className="border-t border-chalk/15 py-20">
+        <SectionHead n="01" title="Bilanz heute" />
+        <Reveal>
+          <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+            <CountUp
+              value={todayTotals.kcal}
+              className="font-display text-[clamp(88px,16vw,180px)] leading-none text-chalk tabular-nums"
+            />
+            <span className="font-mono text-sm font-bold uppercase tracking-[0.3em] text-blaze">
+              kcal
+            </span>
+          </div>
+        </Reveal>
+        <Reveal variant="stagger" className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-3">
+          {macros.map(({ label, grams, pct, bar }) => (
+            <div key={label}>
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-chalk/45">
+                  {label}
+                </span>
+                <span className="font-mono text-[10px] text-chalk/30 tabular-nums">{pct}%</span>
+              </div>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="font-display text-4xl leading-none text-chalk tabular-nums">{grams}</span>
+                <span className="font-mono text-xs text-chalk/35">g</span>
+              </div>
+              <div className="mt-3 h-[3px] w-full bg-chalk/10">
+                <div className={`bar-fill h-full ${bar}`} style={{ '--w': `${pct}%` } as React.CSSProperties} />
+              </div>
+            </div>
+          ))}
+        </Reveal>
+        <Reveal delay={150}>
+          <Link
+            href="/dashboard/calories"
+            className="mt-12 inline-flex items-center gap-2 border border-chalk/20 px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-chalk transition-colors hover:border-blaze hover:bg-blaze hover:text-black"
+          >
+            Essen tracken <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </Reveal>
+      </section>
 
-        {/* HERO — Kalorien */}
-        <div className="group relative col-span-2 row-span-2 isolate overflow-hidden rounded-2xl border border-white/10 bg-black">
-          <Image
-            src={IMG.calories}
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover opacity-90 transition-transform duration-700 ease-out group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/40" />
-          <div className="relative z-10 flex h-full flex-col justify-between p-7">
-            <span className="text-[11px] font-medium uppercase tracking-[0.25em] text-white/55">
-              Kalorien · Heute
+      {/* ── 02 / Training ────────────────────────────────────────────── */}
+      <section data-rail="Training" className="border-t border-chalk/15 py-20">
+        <SectionHead n="02" title="Training & Habits" />
+        <Reveal variant="stagger" className="grid gap-px bg-chalk/15 sm:grid-cols-2 border border-chalk/15">
+          <div className="flex min-h-[220px] flex-col justify-between bg-rubber p-7">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-chalk/45">
+              {recentWorkout ? 'Letzte Einheit' : 'Noch kein Training'}
             </span>
             <div>
-              <div className="flex items-baseline gap-3">
-                <span className="text-7xl font-bold leading-none tracking-tighter text-white tabular-nums sm:text-8xl">
-                  {todayTotals.kcal}
-                </span>
-                <span className="text-lg font-medium text-white/40">kcal</span>
-              </div>
+              <p className="font-display text-4xl uppercase leading-none text-chalk">
+                {recentWorkout ? recentWorkout.split_name : 'Leg los'}
+                <span className="text-blaze">.</span>
+              </p>
               <Link
-                href="/dashboard/calories"
-                className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:text-white/60"
+                href="/dashboard/workout"
+                className="mt-6 inline-flex items-center gap-2 bg-blaze px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-black transition-transform active:scale-[0.98]"
               >
-                Essen tracken <ArrowUpRight className="h-3.5 w-3.5" />
+                Workout starten <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
-        </div>
-
-        {/* Makro-Kacheln */}
-        <MacroTile label="Protein" value={todayTotals.protein} unit="g" />
-        <MacroTile label="Kohlenhydrate" value={todayTotals.carbs} unit="g" />
-        <MacroTile label="Fett" value={todayTotals.fat} unit="g" />
-
-        {/* Training (Bild) */}
-        <NavTile
-          href="/dashboard/workout"
-          label="Training"
-          desc={recentWorkout ? `Zuletzt: ${recentWorkout.split_name}` : 'Workout starten'}
-          img={IMG.training}
-          icon={Dumbbell}
-        />
-
-        {/* Habits */}
-        <Link
-          href="/dashboard/habits"
-          className="group relative col-span-2 isolate overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 p-6 flex flex-col justify-between transition-colors hover:border-white/20"
-        >
-          <div className="flex items-center justify-between">
-            <CheckSquare className="h-5 w-5 text-white/50" />
-            <ArrowUpRight className="h-4 w-4 text-white/25 transition-colors group-hover:text-white/60" />
-          </div>
-          <div>
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-5xl font-bold leading-none tracking-tighter text-white tabular-nums">
-                {habitSummary.done}
+          <Link
+            href="/dashboard/habits"
+            className="group flex min-h-[220px] flex-col justify-between bg-rubber p-7 transition-colors hover:bg-press"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-chalk/45">
+                Habits heute
               </span>
-              <span className="text-lg font-medium text-white/30">/ {habitSummary.total}</span>
+              <ArrowUpRight className="h-4 w-4 text-chalk/25 transition-colors group-hover:text-blaze" />
             </div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              Habits heute
-            </p>
-          </div>
-        </Link>
+            <div className="flex items-baseline gap-2">
+              <CountUp
+                value={habitSummary.done}
+                duration={900}
+                className="font-display text-7xl leading-none text-chalk tabular-nums"
+              />
+              <span className="font-mono text-xl text-chalk/30">/ {habitSummary.total}</span>
+            </div>
+          </Link>
+        </Reveal>
+      </section>
 
-        {/* Bibliothek (breit, Bild) */}
-        <NavTile
-          href="/dashboard/templates"
-          label="Bibliothek"
-          desc="Vorlagen & Übungsdatenbank"
-          img={IMG.library}
-          icon={LayoutTemplate}
-          className="col-span-2"
-        />
-
-        {/* Progress (breit, Bild) */}
-        <NavTile
-          href="/dashboard/progress"
-          label="Progress"
-          desc="Kraft & Gewicht im Verlauf"
-          img={IMG.progress}
-          icon={TrendingUp}
-          className="col-span-2"
-        />
-      </div>
+      {/* ── 03 / Stationen ───────────────────────────────────────────── */}
+      <section data-rail="Stationen" className="border-t border-chalk/15 py-20">
+        <SectionHead n="03" title="Stationen" />
+        <Reveal variant="stagger">
+          {stations.map(({ n, href, label, desc }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex items-center justify-between gap-4 border-b border-chalk/15 px-2 py-5 transition-colors first:border-t hover:bg-blaze"
+            >
+              <div className="flex min-w-0 items-baseline gap-5">
+                <span className="font-mono text-xs text-blaze transition-colors group-hover:text-black">
+                  {n}
+                </span>
+                <span className="truncate font-display text-3xl uppercase leading-none text-chalk transition-colors group-hover:text-black sm:text-4xl">
+                  {label}
+                </span>
+              </div>
+              <div className="flex shrink-0 items-center gap-4">
+                <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-chalk/35 transition-colors group-hover:text-black/70 sm:block">
+                  {desc}
+                </span>
+                <ArrowUpRight className="h-5 w-5 text-chalk/30 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-black" />
+              </div>
+            </Link>
+          ))}
+        </Reveal>
+        <p className="mt-16 font-mono text-[10px] uppercase tracking-[0.3em] text-chalk/20">
+          Fittrack — {new Date().getFullYear()}
+        </p>
+      </section>
     </div>
   )
 }
 
-function MacroTile({ label, value, unit }: { label: string; value: number; unit: string }) {
+function SectionHead({ n, title }: { n: string; title: string }) {
   return (
-    <div className="relative flex flex-col justify-between rounded-2xl border border-white/10 bg-zinc-950 p-5">
-      <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-white/40">
-        {label}
-      </span>
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-4xl font-bold leading-none tracking-tighter text-white tabular-nums">
-          {value}
-        </span>
-        <span className="text-sm font-medium text-white/30">{unit}</span>
-      </div>
-    </div>
-  )
-}
-
-function NavTile({
-  href,
-  label,
-  desc,
-  img,
-  icon: Icon,
-  className = '',
-}: {
-  href: string
-  label: string
-  desc: string
-  img: string
-  icon: typeof Dumbbell
-  className?: string
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group relative isolate overflow-hidden rounded-2xl border border-white/10 bg-black transition-colors hover:border-white/30 ${className}`}
-    >
-      <Image
-        src={img}
-        alt=""
-        fill
-        sizes="(max-width: 1024px) 100vw, 25vw"
-        className="object-cover opacity-70 transition-transform duration-700 ease-out group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
-      <div className="relative z-10 flex h-full flex-col justify-between p-5">
-        <div className="flex items-center justify-between">
-          <Icon className="h-5 w-5 text-white/70" />
-          <ArrowUpRight className="h-4 w-4 text-white/40 transition-colors group-hover:text-white" />
-        </div>
-        <div>
-          <div className="text-lg font-bold tracking-tight text-white">{label}</div>
-          <div className="mt-0.5 text-[11px] font-medium uppercase tracking-[0.15em] text-white/45">
-            {desc}
-          </div>
-        </div>
-      </div>
-    </Link>
+    <Reveal className="mb-12 flex items-center gap-4">
+      <span className="font-mono text-xs font-bold text-blaze">{n}</span>
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-chalk/50">{title}</h2>
+      <span className="h-px flex-1 bg-chalk/15" />
+    </Reveal>
   )
 }

@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
+import { Anton, Space_Grotesk, Space_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import SwRegister from '@/components/SwRegister'
 import { Providers } from './providers'
 import './globals.css'
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
+const anton = Anton({ weight: '400', subsets: ['latin'], variable: '--font-anton' })
+const grotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-grotesk' })
+const smono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-smono' })
 
 export const metadata: Metadata = {
   title: 'FitTrack — Fitness & Kalorie-Tracker',
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#0d0b08',
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
@@ -35,8 +37,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={geist.variable} suppressHydrationWarning>
-      <body className="min-h-screen bg-black text-zinc-100 font-sans antialiased">
+    <html
+      lang="de"
+      className={`${anton.variable} ${grotesk.variable} ${smono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen bg-asphalt text-chalk font-sans antialiased">
         <Providers>
           {children}
           <Toaster
@@ -44,9 +50,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             theme="dark"
             toastOptions={{
               style: {
-                fontSize: '14px',
+                fontSize: '13px',
+                borderRadius: 0,
+                background: '#16130e',
+                border: '1px solid rgba(237,230,216,0.15)',
+                color: '#ede6d8',
               },
-              className: 'bg-zinc-950 border border-white/10 text-zinc-100',
             }}
           />
           <SwRegister />

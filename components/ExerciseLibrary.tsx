@@ -11,7 +11,7 @@ import {
 } from '@/lib/actions/workout'
 import type { Exercise } from '@/lib/types'
 
-const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
+const CARD = 'rounded-none border border-chalk/10 bg-rubber'
 const CATEGORIES = ['Brust', 'Ruecken', 'Schultern', 'Bizeps', 'Trizeps', 'Beine', 'Bauch', 'Kardio', 'Sonstiges']
 
 interface Props {
@@ -126,7 +126,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
       {/* Add form */}
       {showAddForm ? (
         <div className={`${CARD} p-5 space-y-4`}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40">
+          <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40">
             Neue Übung
           </p>
           <input
@@ -138,17 +138,17 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
               if (e.key === 'Escape') setShowAddForm(false)
             }}
             placeholder="Name der Übung..."
-            className="w-full px-3 py-2 bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg text-sm text-zinc-100 placeholder:text-white/25 outline-none transition-colors"
+            className="w-full px-3 py-2 bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none text-sm text-chalk placeholder:text-chalk/25 outline-none transition-colors"
           />
           <div className="flex gap-1.5 flex-wrap">
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
                 onClick={() => setNewCategory(cat)}
-                className={`text-[10px] font-semibold uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border transition-all ${
+                className={`text-[10px] font-semibold font-mono uppercase tracking-[0.15em] px-3 py-1.5 rounded-none border transition-all ${
                   newCategory === cat
-                    ? 'bg-[#ccff00]/15 border-[#ccff00]/30 text-[#ccff00]'
-                    : 'bg-zinc-900 border-white/10 text-white/35 hover:text-white hover:border-white/25'
+                    ? 'bg-blaze/15 border-blaze/30 text-blaze'
+                    : 'bg-asphalt border-chalk/10 text-chalk/35 hover:text-chalk hover:border-chalk/25'
                 }`}
               >
                 {cat}
@@ -159,13 +159,13 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
             <button
               onClick={handleAdd}
               disabled={isPending || !newName.trim()}
-              className="flex-1 py-2.5 bg-[#ccff00] text-black text-sm font-bold rounded-xl disabled:opacity-40 transition-colors"
+              className="flex-1 py-2.5 bg-blaze text-black text-sm font-bold rounded-none disabled:opacity-40 transition-colors"
             >
               Hinzufügen
             </button>
             <button
               onClick={() => { setShowAddForm(false); setNewName('') }}
-              className="px-4 py-2.5 bg-zinc-900 border border-white/10 text-white/40 text-sm rounded-xl hover:text-white transition-colors"
+              className="px-4 py-2.5 bg-asphalt border border-chalk/10 text-chalk/40 text-sm rounded-none hover:text-chalk transition-colors"
             >
               Abbrechen
             </button>
@@ -174,7 +174,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
       ) : (
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-2 px-5 py-3 bg-[#ccff00] text-black text-[11px] font-bold uppercase tracking-[0.15em] rounded-xl transition-all active:scale-[0.98]"
+          className="flex items-center gap-2 px-5 py-3 bg-blaze text-black text-[11px] font-bold font-mono uppercase tracking-[0.15em] rounded-none transition-all active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           Übung hinzufügen
@@ -184,21 +184,21 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
       {/* Search + archive toggle */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-chalk/25 pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Suchen..."
-            className="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-white/10 focus:border-white/30 rounded-xl text-sm text-zinc-100 placeholder:text-white/25 outline-none transition-colors"
+            className="w-full pl-9 pr-3 py-2 bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none text-sm text-chalk placeholder:text-chalk/25 outline-none transition-colors"
           />
         </div>
         {archivedCount > 0 && (
           <button
             onClick={() => { setShowArchived(!showArchived); setSearch('') }}
-            className={`px-3 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-[0.12em] border transition-colors whitespace-nowrap ${
+            className={`px-3 py-2 rounded-none text-[11px] font-semibold font-mono uppercase tracking-[0.12em] border transition-colors whitespace-nowrap ${
               showArchived
-                ? 'bg-zinc-800 border-white/20 text-white'
-                : 'bg-zinc-900 border-white/10 text-white/35 hover:text-white'
+                ? 'bg-press border-chalk/20 text-chalk'
+                : 'bg-asphalt border-chalk/10 text-chalk/35 hover:text-chalk'
             }`}
           >
             Archiv ({archivedCount})
@@ -206,7 +206,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
         )}
       </div>
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/25">
+      <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25">
         {showArchived
           ? `${archivedCount} archivierte eigene Übungen`
           : `${ownCount} eigene · ${exercises.filter(e => !e.is_archived && e.user_id === null).length} global`}
@@ -216,19 +216,19 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
       {/* Exercise list */}
       {grouped.length === 0 ? (
         <div className={`${CARD} py-14 text-center px-6`}>
-          <p className="text-sm font-bold tracking-tight text-white/30">Keine Übungen gefunden</p>
+          <p className="text-sm font-bold tracking-tight text-chalk/30">Keine Übungen gefunden</p>
         </div>
       ) : (
         <div className={`${CARD} overflow-hidden`}>
           {grouped.map(([cat, exList]) => (
-            <div key={cat} className="border-b border-white/5 last:border-b-0">
-              <div className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 bg-zinc-900/50">
+            <div key={cat} className="border-b border-chalk/5 last:border-b-0">
+              <div className="px-5 py-2.5 text-[10px] font-bold font-mono uppercase tracking-[0.25em] text-chalk/30 bg-asphalt/50">
                 {cat}
               </div>
               {exList.map(ex => (
                 <div
                   key={ex.id}
-                  className="flex items-center gap-2 px-5 py-3 border-t border-white/[0.04] hover:bg-zinc-900/30 transition-colors"
+                  className="flex items-center gap-2 px-5 py-3 border-t border-chalk/[0.04] hover:bg-asphalt/30 transition-colors"
                 >
                   {editingId === ex.id ? (
                     <>
@@ -240,41 +240,41 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
                           if (e.key === 'Enter') handleRename(ex.id)
                           if (e.key === 'Escape') setEditingId(null)
                         }}
-                        className="flex-1 px-2 py-1 bg-zinc-800 border border-white/20 rounded-lg text-sm text-zinc-100 outline-none"
+                        className="flex-1 px-2 py-1 bg-press border border-chalk/20 rounded-none text-sm text-chalk outline-none"
                       />
                       <button
                         onClick={() => handleRename(ex.id)}
                         disabled={isPending}
-                        className="p-1.5 text-[#ccff00] hover:text-[#ccff00]/70 disabled:opacity-40 transition-colors"
+                        className="p-1.5 text-blaze hover:text-blaze/70 disabled:opacity-40 transition-colors"
                       >
                         <Check className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="p-1.5 text-white/30 hover:text-white transition-colors"
+                        className="p-1.5 text-chalk/30 hover:text-chalk transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className={`flex-1 text-sm font-bold tracking-tight ${ex.is_archived ? 'text-white/25 line-through' : 'text-white'}`}>
+                      <span className={`flex-1 text-sm font-bold tracking-tight ${ex.is_archived ? 'text-chalk/25 line-through' : 'text-chalk'}`}>
                         {ex.name}
                       </span>
                       {ex.user_id === null && (
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25 px-2 py-0.5 rounded-full border border-white/10 shrink-0">
+                        <span className="text-[10px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25 px-2 py-0.5 rounded-none border border-chalk/10 shrink-0">
                           global
                         </span>
                       )}
                       {ex.user_id === userId && ex.is_archived && (
                         <>
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/25 px-2 py-0.5 rounded-full border border-white/10 shrink-0">
+                          <span className="text-[10px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25 px-2 py-0.5 rounded-none border border-chalk/10 shrink-0">
                             archiviert
                           </span>
                           <button
                             onClick={() => handleRestore(ex.id)}
                             disabled={isPending}
-                            className="p-1.5 text-white/30 hover:text-white transition-colors disabled:opacity-40"
+                            className="p-1.5 text-chalk/30 hover:text-chalk transition-colors disabled:opacity-40"
                             title="Wiederherstellen"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
@@ -286,7 +286,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
                           <button
                             onClick={() => startEdit(ex)}
                             disabled={isPending}
-                            className="p-1.5 text-white/25 hover:text-white transition-colors disabled:opacity-40"
+                            className="p-1.5 text-chalk/25 hover:text-chalk transition-colors disabled:opacity-40"
                             title="Umbenennen"
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -297,7 +297,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
                             className={`p-1.5 transition-colors disabled:opacity-40 rounded ${
                               deletingId === ex.id
                                 ? 'text-red-400 bg-red-500/10'
-                                : 'text-white/25 hover:text-red-400'
+                                : 'text-chalk/25 hover:text-red-400'
                             }`}
                             title={deletingId === ex.id ? 'Nochmal klicken zum Bestätigen' : 'Entfernen'}
                           >
@@ -315,7 +315,7 @@ export default function ExerciseLibrary({ initialExercises, userId }: Props) {
       )}
 
       {deletingId && (
-        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/25 text-center">
+        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25 text-center">
           Nochmal klicken zum Bestätigen
         </p>
       )}

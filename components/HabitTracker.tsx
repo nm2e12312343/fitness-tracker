@@ -6,8 +6,8 @@ import { Check, Flame, Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react
 import type { HabitWithLogs } from '@/lib/types'
 
 const COLORS = [
-  '#00f2fe', '#ccff00', '#ff6b6b', '#ffd93d',
-  '#6bcb77', '#ff922b', '#cc5de8', '#74c0fc',
+  '#ff4d00', '#ffb347', '#f4d35e', '#7fb069',
+  '#4fb3bf', '#74c0fc', '#cc5de8', '#e63946',
 ]
 
 const EMOJIS = ['💪', '📚', '💧', '🧘', '🏃', '🥗', '😴', '✍️', '🎯', '🚶']
@@ -82,24 +82,24 @@ export default function HabitTracker({ habits: init, today }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <header className="flex items-end justify-between border-b border-white/10 pb-6">
+      <header className="flex items-end justify-between border-b border-chalk/10 pb-6">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.3em] text-chalk/40">
             Gewohnheiten · Heute
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-            Habits.
+          <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+            Habits<span className="text-blaze">.</span>
           </h1>
           {habits.length > 0 && (
-            <p className="mt-2 text-sm text-white/40">
-              <span className="text-white font-semibold">{doneCount}</span>
-              <span className="text-white/30"> / {habits.length} heute erledigt</span>
+            <p className="mt-2 text-sm text-chalk/40">
+              <span className="text-chalk font-semibold">{doneCount}</span>
+              <span className="text-chalk/30"> / {habits.length} heute erledigt</span>
             </p>
           )}
         </div>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50 transition-all hover:border-white/25 hover:text-white"
+          className="flex items-center gap-1.5 rounded-none border border-chalk/10 bg-rubber px-4 py-2.5 text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/50 transition-all hover:border-chalk/25 hover:text-chalk"
         >
           <Plus className="h-3.5 w-3.5" />
           Neu
@@ -108,8 +108,8 @@ export default function HabitTracker({ habits: init, today }: Props) {
 
       {/* Add form */}
       {showAdd && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6 space-y-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40">
+        <div className="rounded-none border border-chalk/10 bg-rubber p-6 space-y-5">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40">
             Neue Gewohnheit
           </p>
 
@@ -119,11 +119,11 @@ export default function HabitTracker({ habits: init, today }: Props) {
             onKeyDown={(e) => e.key === 'Enter' && add()}
             placeholder="z.B. Trinken, Lesen, Meditieren…"
             autoFocus
-            className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-white/30 transition-colors"
+            className="w-full rounded-none border border-chalk/10 bg-black px-4 py-3 text-sm text-chalk placeholder-chalk/25 outline-none focus:border-chalk/30 transition-colors"
           />
 
           <div>
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+            <p className="mb-2.5 text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/30">
               Symbol
             </p>
             <div className="flex flex-wrap gap-2">
@@ -131,10 +131,10 @@ export default function HabitTracker({ habits: init, today }: Props) {
                 <button
                   key={e}
                   onClick={() => setNewEmoji(e)}
-                  className={`rounded-xl border p-2 text-xl transition-colors ${
+                  className={`rounded-none border p-2 text-xl transition-colors ${
                     newEmoji === e
-                      ? 'border-white/30 bg-white/10'
-                      : 'border-white/10 bg-black hover:border-white/20'
+                      ? 'border-chalk/30 bg-chalk/10'
+                      : 'border-chalk/10 bg-black hover:border-chalk/20'
                   }`}
                 >
                   {e}
@@ -144,7 +144,7 @@ export default function HabitTracker({ habits: init, today }: Props) {
           </div>
 
           <div>
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+            <p className="mb-2.5 text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/30">
               Farbe
             </p>
             <div className="flex gap-2.5">
@@ -153,7 +153,7 @@ export default function HabitTracker({ habits: init, today }: Props) {
                   key={c}
                   onClick={() => setNewColor(c)}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    newColor === c ? 'border-white scale-110' : 'border-transparent'
+                    newColor === c ? 'border-chalk scale-110' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -165,13 +165,13 @@ export default function HabitTracker({ habits: init, today }: Props) {
             <button
               onClick={add}
               disabled={!newName.trim()}
-              className="flex-1 rounded-xl bg-white py-2.5 text-sm font-bold text-black transition-opacity disabled:opacity-40 hover:bg-zinc-100"
+              className="flex-1 rounded-none bg-blaze py-2.5 text-sm font-bold text-black transition-opacity disabled:opacity-40 hover:opacity-90"
             >
               Hinzufügen
             </button>
             <button
               onClick={() => { setShowAdd(false); setNewName('') }}
-              className="rounded-xl border border-white/10 px-5 py-2.5 text-sm text-white/50 hover:text-white transition-colors"
+              className="rounded-none border border-chalk/10 px-5 py-2.5 text-sm text-chalk/50 hover:text-chalk transition-colors"
             >
               Abbrechen
             </button>
@@ -181,10 +181,10 @@ export default function HabitTracker({ habits: init, today }: Props) {
 
       {/* Empty state */}
       {habits.length === 0 && !showAdd && (
-        <div className="rounded-2xl border border-dashed border-white/10 p-16 text-center">
+        <div className="rounded-none border border-dashed border-chalk/10 p-16 text-center">
           <p className="text-4xl mb-4">🎯</p>
-          <p className="text-sm font-semibold text-white/40">Noch keine Gewohnheiten</p>
-          <p className="mt-1 text-xs text-white/25">
+          <p className="text-sm font-semibold text-chalk/40">Noch keine Gewohnheiten</p>
+          <p className="mt-1 text-xs text-chalk/25">
             Klicke auf &ldquo;Neu&rdquo; um zu starten
           </p>
         </div>
@@ -226,7 +226,7 @@ function HabitCard({
   onArchive: () => void
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-950 overflow-hidden transition-colors hover:border-white/15">
+    <div className="rounded-none border border-chalk/10 bg-rubber overflow-hidden transition-colors hover:border-chalk/15">
       <div className="flex items-center gap-4 px-5 py-4">
         {/* Color bar */}
         <div
@@ -239,14 +239,14 @@ function HabitCard({
         )}
 
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-white leading-tight truncate">{habit.name}</p>
+          <p className="font-semibold text-chalk leading-tight truncate">{habit.name}</p>
           {habit.streak > 0 ? (
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-white/40">
+            <p className="mt-0.5 flex items-center gap-1 text-xs text-chalk/40">
               <Flame className="h-3 w-3" style={{ color: habit.color }} />
               {habit.streak} Tag{habit.streak !== 1 ? 'e' : ''} am Stück
             </p>
           ) : (
-            <p className="mt-0.5 text-xs text-white/25">Noch kein Streak</p>
+            <p className="mt-0.5 text-xs text-chalk/25">Noch kein Streak</p>
           )}
         </div>
 
@@ -256,7 +256,7 @@ function HabitCard({
           className={`h-9 w-9 shrink-0 rounded-full border-2 flex items-center justify-center transition-all active:scale-95 ${
             habit.completedToday
               ? 'border-transparent scale-105'
-              : 'border-white/20 hover:border-white/50'
+              : 'border-chalk/20 hover:border-chalk/50'
           }`}
           style={habit.completedToday ? { backgroundColor: habit.color } : {}}
           aria-label={habit.completedToday ? 'Abhaken rückgängig' : 'Erledigt'}
@@ -269,7 +269,7 @@ function HabitCard({
         {/* Expand */}
         <button
           onClick={onExpand}
-          className="text-white/25 hover:text-white/70 transition-colors"
+          className="text-chalk/25 hover:text-chalk/70 transition-colors"
         >
           {expanded ? (
             <ChevronUp className="h-4 w-4" />
@@ -280,11 +280,11 @@ function HabitCard({
       </div>
 
       {expanded && (
-        <div className="border-t border-white/5 px-5 py-5 space-y-5">
+        <div className="border-t border-chalk/5 px-5 py-5 space-y-5">
           <MonthlyGrid habit={habit} today={today} />
           <button
             onClick={onArchive}
-            className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/25 transition-colors hover:text-red-400"
+            className="flex items-center gap-1.5 text-[11px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/25 transition-colors hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Archivieren
@@ -321,14 +321,14 @@ function MonthlyGrid({
 
   return (
     <div className="space-y-5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+      <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/30">
         Verlauf · 3 Monate
       </p>
       {months.map(({ label, days, doneCount, total }) => (
         <div key={label}>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-medium text-white/30">{label}</p>
-            <p className="text-[10px] text-white/20">
+            <p className="text-[10px] font-medium text-chalk/30">{label}</p>
+            <p className="text-[10px] text-chalk/20">
               {doneCount}/{total}
             </p>
           </div>
@@ -338,7 +338,7 @@ function MonthlyGrid({
                 key={s}
                 title={s}
                 className={`h-[18px] w-[18px] rounded-[3px] transition-colors ${
-                  future ? 'bg-white/5' : done ? '' : 'bg-white/10'
+                  future ? 'bg-chalk/5' : done ? '' : 'bg-chalk/10'
                 }`}
                 style={done ? { backgroundColor: habit.color, opacity: 0.85 } : {}}
               />

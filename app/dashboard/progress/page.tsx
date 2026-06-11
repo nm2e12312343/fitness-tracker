@@ -2,9 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { getWeightHistory } from '@/lib/actions/calories'
 import VolumeChart from '@/components/charts/VolumeChart'
 import WeightChart from '@/components/charts/WeightChart'
+import Reveal from '@/components/Reveal'
+import CountUp from '@/components/CountUp'
 import type { VolumeChartPoint } from '@/lib/types'
 
-const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
+const CARD = 'rounded-none border border-chalk/10 bg-rubber'
 
 export default async function ProgressPage() {
   const supabase = await createClient()
@@ -47,56 +49,58 @@ export default async function ProgressPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <header className="border-b border-white/10 pb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+      <header className="border-b border-chalk/10 pb-6">
+        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.3em] text-chalk/40">
           Letzte 90 Tage
         </p>
-        <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-          Progress.
+        <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+          Progress<span className="text-blaze">.</span>
         </h1>
       </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard label="Workouts" value={String(totalWorkouts)} unit="" />
-        <StatCard label="Gesamtvolumen" value={`${(totalVolume / 1000).toFixed(1)}`} unit="t" />
-        <StatCard label="Bestes 1RM" value={String(maxOneRM)} unit="kg" />
-        <StatCard label="Körpergewicht" value={latestWeight ? String(latestWeight) : '—'} unit={latestWeight ? 'kg' : ''} />
-      </div>
+      <Reveal variant="stagger" className="grid grid-cols-2 lg:grid-cols-4 gap-px border border-chalk/15 bg-chalk/15">
+        <StatCard label="Workouts" value={totalWorkouts} unit="" />
+        <StatCard label="Gesamtvolumen" value={totalVolume / 1000} decimals={1} unit="t" />
+        <StatCard label="Bestes 1RM" value={maxOneRM} unit="kg" />
+        <StatCard label="Körpergewicht" value={latestWeight} decimals={1} unit={latestWeight ? 'kg' : ''} />
+      </Reveal>
 
-      <div className={`${CARD} p-6`}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">
+      <Reveal className={`${CARD} p-6`}>
+        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
           Trainingsvolumen & 1RM
         </p>
-        <p className="text-sm font-bold tracking-tight text-white mb-5">
+        <p className="text-sm font-bold tracking-tight text-chalk mb-5">
           Volumen pro Tag & Epley-1RM-Schätzung
         </p>
         <VolumeChart data={volumeData} />
-      </div>
+      </Reveal>
 
-      <div className={`${CARD} p-6`}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40 mb-1">
+      <Reveal className={`${CARD} p-6`}>
+        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
           Körpergewicht
         </p>
-        <p className="text-sm font-bold tracking-tight text-white mb-5">
+        <p className="text-sm font-bold tracking-tight text-chalk mb-5">
           Verlauf in kg
         </p>
         <WeightChart data={weightHistory} />
-      </div>
+      </Reveal>
     </div>
   )
 }
 
-function StatCard({ label, value, unit }: { label: string; value: string; unit: string }) {
+function StatCard({ label, value, unit, decimals = 0 }: { label: string; value: number | null; unit: string; decimals?: number }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5 flex flex-col justify-between">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40">
+    <div className="bg-rubber p-5 flex flex-col justify-between">
+      <span className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40">
         {label}
       </span>
       <div className="flex items-baseline gap-1.5 mt-3">
-        <span className="text-4xl font-bold leading-none tracking-tighter text-white tabular-nums">
-          {value}
-        </span>
-        {unit && <span className="text-sm font-medium text-white/30">{unit}</span>}
+        {value === null ? (
+          <span className="font-display text-4xl leading-none text-chalk/30">—</span>
+        ) : (
+          <CountUp value={value} decimals={decimals} className="font-display text-4xl leading-none text-chalk tabular-nums" />
+        )}
+        {unit && <span className="font-mono text-sm text-chalk/30">{unit}</span>}
       </div>
     </div>
   )

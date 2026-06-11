@@ -25,8 +25,8 @@ interface Props {
   exercises: Exercise[]
 }
 
-const CARD = 'rounded-2xl border border-white/10 bg-zinc-950'
-const INPUT = 'bg-zinc-900 border border-white/10 focus:border-white/30 rounded-lg px-2 py-1.5 text-sm text-zinc-100 outline-none text-center transition-colors'
+const CARD = 'rounded-none border border-chalk/10 bg-rubber'
+const INPUT = 'bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-2 py-1.5 text-sm text-chalk outline-none text-center transition-colors'
 
 function localDate() {
   const d = new Date()
@@ -194,18 +194,18 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <header className="flex items-end justify-between gap-4 flex-wrap border-b border-white/10 pb-6">
+      <header className="flex items-end justify-between gap-4 flex-wrap border-b border-chalk/10 pb-6">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.3em] text-chalk/40">
             Vergangene Einheiten
           </p>
-          <h1 className="mt-2 text-4xl font-bold leading-none tracking-tighter text-white">
-            Logbuch.
+          <h1 className="mt-3 font-display text-5xl uppercase leading-[0.9] text-chalk">
+            Logbuch<span className="text-blaze">.</span>
           </h1>
         </div>
         <button
           onClick={() => setShowNachtragen(!showNachtragen)}
-          className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] bg-[#ccff00] text-black px-4 py-2.5 rounded-xl transition-all active:scale-[0.98]"
+          className="flex items-center gap-1.5 text-[11px] font-bold font-mono uppercase tracking-[0.15em] bg-blaze text-black px-4 py-2.5 rounded-none transition-all active:scale-[0.98]"
         >
           <Plus className="w-3.5 h-3.5" />
           Nachtragen
@@ -216,39 +216,39 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
       {showNachtragen && (
         <div className={`${CARD} p-6 space-y-5`}>
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+            <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40">
               Training manuell nachtragen
             </p>
-            <button onClick={() => setShowNachtragen(false)} className="text-white/30 hover:text-white transition-colors">
+            <button onClick={() => setShowNachtragen(false)} className="text-chalk/30 hover:text-chalk transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex gap-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2">
-              <CalendarDays className="w-3.5 h-3.5 text-white/30 shrink-0" />
+            <div className="flex items-center gap-2 bg-asphalt border border-chalk/10 rounded-none px-3 py-2">
+              <CalendarDays className="w-3.5 h-3.5 text-chalk/30 shrink-0" />
               <input
                 type="date" value={ntDate} max={localDate()}
                 onChange={(e) => e.target.value && setNtDate(e.target.value)}
-                className="bg-transparent text-sm text-zinc-300 outline-none cursor-pointer"
+                className="bg-transparent text-sm text-chalk/75 outline-none cursor-pointer"
               />
             </div>
             <input
               type="text" value={ntName}
               onChange={(e) => setNtName(e.target.value)}
               placeholder="Training-Name (z.B. Push Day)"
-              className="flex-1 min-w-[180px] bg-zinc-900 border border-white/10 focus:border-white/30 rounded-xl px-3 py-2 text-sm text-zinc-100 outline-none transition-colors"
+              className="flex-1 min-w-[180px] bg-asphalt border border-chalk/10 focus:border-chalk/30 rounded-none px-3 py-2 text-sm text-chalk outline-none transition-colors"
             />
           </div>
 
           <div className="space-y-3">
             {ntExercises.map((ntEx) => (
-              <div key={ntEx.id} className="rounded-xl border border-white/10 bg-zinc-900 p-4 space-y-3">
+              <div key={ntEx.id} className="rounded-none border border-chalk/10 bg-asphalt p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <select
                     value={ntEx.exerciseId}
                     onChange={(e) => updateNtExerciseId(ntEx.id, e.target.value)}
-                    className="flex-1 bg-zinc-800 border border-white/10 focus:border-white/30 rounded-lg px-2 py-1.5 text-sm text-zinc-100 outline-none transition-colors"
+                    className="flex-1 bg-press border border-chalk/10 focus:border-chalk/30 rounded-none px-2 py-1.5 text-sm text-chalk outline-none transition-colors"
                   >
                     <option value="">Übung wählen...</option>
                     {Object.entries(groupedExercises).map(([cat, exs]) => (
@@ -260,21 +260,21 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                   <button
                     onClick={() => removeNtExercise(ntEx.id)}
                     disabled={ntExercises.length === 1}
-                    className="text-white/25 hover:text-red-400 transition-colors disabled:opacity-20 shrink-0 p-1"
+                    className="text-chalk/25 hover:text-red-400 transition-colors disabled:opacity-20 shrink-0 p-1"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <div className="space-y-1.5 pl-1">
                   <div className="grid grid-cols-[3rem_1fr_1fr_2rem] gap-2 px-1">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25" />
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25 text-center">kg</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-white/25 text-center">Wdh.</span>
+                    <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25" />
+                    <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25 text-center">kg</span>
+                    <span className="text-[10px] font-semibold font-mono uppercase tracking-widest text-chalk/25 text-center">Wdh.</span>
                     <span />
                   </div>
                   {ntEx.sets.map((set, setIdx) => (
                     <div key={set.id} className="grid grid-cols-[3rem_1fr_1fr_2rem] gap-2 items-center">
-                      <span className="text-xs font-bold text-white/35">Satz {setIdx + 1}</span>
+                      <span className="text-xs font-bold text-chalk/35">Satz {setIdx + 1}</span>
                       <input
                         type="number" value={set.weight}
                         onChange={(e) => updateNtSet(ntEx.id, set.id, 'weight', e.target.value)}
@@ -290,7 +290,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                       <button
                         onClick={() => removeNtSet(ntEx.id, set.id)}
                         disabled={ntEx.sets.length === 1}
-                        className="text-white/25 hover:text-red-400 transition-colors disabled:opacity-20"
+                        className="text-chalk/25 hover:text-red-400 transition-colors disabled:opacity-20"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -298,7 +298,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                   ))}
                   <button
                     onClick={() => addNtSet(ntEx.id)}
-                    className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/25 hover:text-white transition-colors mt-1"
+                    className="flex items-center gap-1 text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/25 hover:text-chalk transition-colors mt-1"
                   >
                     <Plus className="w-3 h-3" /> Satz hinzufügen
                   </button>
@@ -307,24 +307,24 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
             ))}
             <button
               onClick={() => setNtExercises((prev) => [...prev, makeNtExercise()])}
-              className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/30 hover:text-chalk transition-colors"
             >
               <Plus className="w-3.5 h-3.5" /> Übung hinzufügen
             </button>
           </div>
 
-          <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+          <div className="flex items-center gap-3 pt-2 border-t border-chalk/5">
             <button
               onClick={handleSaveNachtragen}
               disabled={isSavingNt}
-              className="flex items-center gap-1.5 bg-[#ccff00] text-black text-sm font-bold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-all active:scale-[0.98]"
+              className="flex items-center gap-1.5 bg-blaze text-black text-sm font-bold px-5 py-2.5 rounded-none disabled:opacity-50 transition-all active:scale-[0.98]"
             >
               {isSavingNt ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               Training speichern
             </button>
             <button
               onClick={() => setShowNachtragen(false)}
-              className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 hover:text-white transition-colors"
+              className="text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/30 hover:text-chalk transition-colors"
             >
               Abbrechen
             </button>
@@ -335,12 +335,12 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
       {/* History list */}
       {history.length === 0 ? (
         <div className={`${CARD} flex flex-col items-center justify-center py-20 gap-4`}>
-          <div className="p-4 rounded-2xl bg-zinc-900 border border-white/10">
-            <BookOpen className="w-6 h-6 text-white/30" />
+          <div className="p-4 rounded-none bg-asphalt border border-chalk/10">
+            <BookOpen className="w-6 h-6 text-chalk/30" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-bold tracking-tight text-white/40">Noch kein Training absolviert</p>
-            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/20 mt-1">
+            <p className="text-sm font-bold tracking-tight text-chalk/40">Noch kein Training absolviert</p>
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/20 mt-1">
               Starte dein erstes Training oder trag eines manuell nach
             </p>
           </div>
@@ -354,11 +354,11 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                   onClick={() => handleExpand(w.id)}
                   className="flex-1 flex items-center gap-4 min-w-0 text-left"
                 >
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35 tabular-nums shrink-0 w-28">
+                  <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/35 tabular-nums shrink-0 w-28">
                     {formatDateDE(w.date)}
                   </span>
-                  <span className="text-sm font-bold tracking-tight text-white truncate">{w.split_name}</span>
-                  <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/30 shrink-0 ml-auto">
+                  <span className="text-sm font-bold tracking-tight text-chalk truncate">{w.split_name}</span>
+                  <span className="text-[11px] font-medium font-mono uppercase tracking-[0.12em] text-chalk/30 shrink-0 ml-auto">
                     {w.set_count} Sätze
                   </span>
                 </button>
@@ -367,10 +367,10 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                   <button
                     onClick={() => handleDeleteWorkout(w.id)}
                     disabled={isDeletingWorkout && deletingWorkoutId === w.id}
-                    className={`flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors px-2 py-1 rounded-lg border ${
+                    className={`flex items-center gap-1 text-[11px] font-semibold font-mono uppercase tracking-[0.1em] transition-colors px-2 py-1 rounded-none border ${
                       deletingWorkoutId === w.id
                         ? 'text-red-400 border-red-500/30 bg-red-500/10'
-                        : 'text-white/25 border-transparent hover:text-red-400 hover:border-red-500/20'
+                        : 'text-chalk/25 border-transparent hover:text-red-400 hover:border-red-500/20'
                     } disabled:opacity-50`}
                   >
                     {isDeletingWorkout && deletingWorkoutId === w.id
@@ -380,13 +380,13 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                     {deletingWorkoutId === w.id ? 'Löschen?' : ''}
                   </button>
                   {deletingWorkoutId === w.id && (
-                    <button onClick={() => setDeletingWorkoutId(null)} className="text-[11px] text-white/25 hover:text-white/50 transition-colors">
+                    <button onClick={() => setDeletingWorkoutId(null)} className="text-[11px] text-chalk/25 hover:text-chalk/50 transition-colors">
                       Abbrechen
                     </button>
                   )}
                   <button
                     onClick={() => handleExpand(w.id)}
-                    className="text-white/30 hover:text-white transition-colors p-1"
+                    className="text-chalk/30 hover:text-chalk transition-colors p-1"
                   >
                     {expandedId === w.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
@@ -394,21 +394,21 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
               </div>
 
               {expandedId === w.id && (
-                <div className="border-t border-white/5">
+                <div className="border-t border-chalk/5">
                   {loadingDetailId === w.id ? (
-                    <div className="flex items-center justify-center py-8 gap-2 text-white/30 text-sm">
+                    <div className="flex items-center justify-center py-8 gap-2 text-chalk/30 text-sm">
                       <Loader2 className="w-4 h-4 animate-spin" /> Lade Details...
                     </div>
                   ) : !detail ? null : detail.workout_logs.length === 0 ? (
-                    <div className="px-5 py-6 text-sm text-white/30">Keine Einträge</div>
+                    <div className="px-5 py-6 text-sm text-chalk/30">Keine Einträge</div>
                   ) : (
-                    <div className="divide-y divide-white/[0.04]">
+                    <div className="divide-y divide-chalk/[0.04]">
                       {groupLogsByExercise(detail.workout_logs).map((group) => (
                         <div key={group.exerciseId} className="px-5 py-4 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold tracking-tight text-white">{group.name}</span>
+                            <span className="text-sm font-bold tracking-tight text-chalk">{group.name}</span>
                             {group.category && (
-                              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/30">{group.category}</span>
+                              <span className="text-[11px] font-medium font-mono uppercase tracking-[0.12em] text-chalk/30">{group.category}</span>
                             )}
                           </div>
                           <div className="space-y-1 pl-2">
@@ -416,31 +416,31 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                               <div key={log.id}>
                                 {editingLogId === log.id ? (
                                   <div className="flex items-center gap-2 flex-wrap py-1">
-                                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35 w-14 shrink-0">
+                                    <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/35 w-14 shrink-0">
                                       Satz {(log.set_number ?? setIdx + 1)}
                                     </span>
                                     <input
                                       type="number" value={editValues.weight}
                                       onChange={(e) => setEditValues((v) => ({ ...v, weight: e.target.value }))}
                                       placeholder="kg" min="0" step="0.5"
-                                      className="w-20 bg-zinc-900 border border-white/30 rounded-lg px-2 py-1 text-sm text-zinc-100 outline-none text-center"
+                                      className="w-20 bg-asphalt border border-chalk/30 rounded-none px-2 py-1 text-sm text-chalk outline-none text-center"
                                     />
-                                    <span className="text-xs text-white/30">kg ×</span>
+                                    <span className="text-xs text-chalk/30">kg ×</span>
                                     <input
                                       type="number" value={editValues.reps}
                                       onChange={(e) => setEditValues((v) => ({ ...v, reps: e.target.value }))}
                                       placeholder="Wdh" min="1"
-                                      className="w-16 bg-zinc-900 border border-white/30 rounded-lg px-2 py-1 text-sm text-zinc-100 outline-none text-center"
+                                      className="w-16 bg-asphalt border border-chalk/30 rounded-none px-2 py-1 text-sm text-chalk outline-none text-center"
                                     />
-                                    <span className="text-xs text-white/30">Wdh.</span>
+                                    <span className="text-xs text-chalk/30">Wdh.</span>
                                     <div className="flex items-center gap-1.5 ml-auto">
                                       <button
                                         onClick={saveEdit} disabled={isSavingLog}
-                                        className="text-[#ccff00] hover:text-[#ccff00]/70 transition-colors disabled:opacity-50"
+                                        className="text-blaze hover:text-blaze/70 transition-colors disabled:opacity-50"
                                       >
                                         {isSavingLog ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                                       </button>
-                                      <button onClick={() => setEditingLogId(null)} className="text-white/30 hover:text-white transition-colors">
+                                      <button onClick={() => setEditingLogId(null)} className="text-chalk/30 hover:text-chalk transition-colors">
                                         <X className="w-4 h-4" />
                                       </button>
                                     </div>
@@ -448,17 +448,17 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                                 ) : (
                                   <div className="flex items-center justify-between gap-2 py-0.5">
                                     <div className="flex items-center gap-3 min-w-0">
-                                      <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/30 w-14 shrink-0">
+                                      <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.1em] text-chalk/30 w-14 shrink-0">
                                         Satz {(log.set_number ?? setIdx + 1)}
                                       </span>
-                                      <span className="text-sm text-zinc-300 tabular-nums">
+                                      <span className="text-sm text-chalk/75 tabular-nums">
                                         {log.weight} kg × {log.reps} Wdh.
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
                                       <button
                                         onClick={() => startEdit(log.id, log.weight, log.reps)}
-                                        className="text-white/25 hover:text-white transition-colors p-1"
+                                        className="text-chalk/25 hover:text-chalk transition-colors p-1"
                                       >
                                         <Pencil className="w-3.5 h-3.5" />
                                       </button>
@@ -466,7 +466,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                                         onClick={() => handleDeleteLog(log.id)}
                                         disabled={isDeletingLog && deletingLogId === log.id}
                                         className={`p-1 transition-colors disabled:opacity-50 ${
-                                          deletingLogId === log.id ? 'text-red-400' : 'text-white/25 hover:text-red-400'
+                                          deletingLogId === log.id ? 'text-red-400' : 'text-chalk/25 hover:text-red-400'
                                         }`}
                                       >
                                         {isDeletingLog && deletingLogId === log.id
@@ -477,7 +477,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                                       {deletingLogId === log.id && (
                                         <button
                                           onClick={() => setDeletingLogId(null)}
-                                          className="text-[11px] text-white/25 hover:text-white/50 transition-colors ml-1"
+                                          className="text-[11px] text-chalk/25 hover:text-chalk/50 transition-colors ml-1"
                                         >
                                           Abbrechen
                                         </button>
