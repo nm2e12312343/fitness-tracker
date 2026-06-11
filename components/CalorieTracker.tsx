@@ -11,6 +11,7 @@ import {
 } from '@/lib/actions/calories'
 import CalorieChart from '@/components/charts/CalorieChart'
 import WeightChart from '@/components/charts/WeightChart'
+import Reveal from '@/components/Reveal'
 import {
   Scale, Utensils, Sparkles, Check, Loader2, Pencil, Trash2, X,
   CalendarDays, Salad, ChevronDown, ChevronUp,
@@ -357,7 +358,7 @@ export default function CalorieTracker({
             <button
               onClick={handleSaveItemEdit}
               disabled={isSavingItemEdit}
-              className="flex items-center gap-1.5 bg-blaze text-black text-sm font-bold px-4 py-2 rounded-none transition-all disabled:opacity-50 active:scale-[0.98]"
+              className="flex items-center gap-1.5 bg-blaze text-black font-mono text-[11px] font-bold uppercase tracking-[0.15em] px-4 py-2.5 rounded-none transition-all disabled:opacity-50 active:scale-[0.98]"
             >
               {isSavingItemEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               Speichern
@@ -367,7 +368,8 @@ export default function CalorieTracker({
       )}
 
       {/* Tageszusammenfassung */}
-      <div className={`${CARD} overflow-hidden`}>
+      <section data-rail="Heute" className="space-y-6">
+      <Reveal className={`${CARD} overflow-hidden`}>
         {isDateLoading ? (
           <div className="flex items-center justify-center h-24 gap-2 text-chalk/30 text-sm">
             <Loader2 className="w-4 h-4 animate-spin" /> Lade Daten...
@@ -382,11 +384,11 @@ export default function CalorieTracker({
                 { label: 'Fett', value: totals.fat, unit: 'g', color: 'text-chalk/45' },
               ].map(({ label, value, unit, color }) => (
                 <div key={label} className="p-5">
-                  <div className="flex items-baseline gap-1">
-                    <span className={`text-2xl font-bold tracking-tighter tabular-nums ${color}`}>{value}</span>
-                    <span className="text-xs text-chalk/30">{unit}</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`font-display text-4xl leading-none tabular-nums ${color}`}>{value}</span>
+                    <span className="font-mono text-xs text-chalk/30">{unit}</span>
                   </div>
-                  <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40 mt-1">{label}</p>
+                  <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.2em] text-chalk/40 mt-2">{label}</p>
                 </div>
               ))}
             </div>
@@ -460,13 +462,19 @@ export default function CalorieTracker({
             </div>
           </div>
         )}
-      </div>
+      </Reveal>
 
       {/* Goy-Score Barometer */}
-      {dailyGoyScore !== null && <GoyBarometer score={dailyGoyScore} />}
+      {dailyGoyScore !== null && (
+        <Reveal>
+          <GoyBarometer score={dailyGoyScore} />
+        </Reveal>
+      )}
+      </section>
 
       {/* Körpergewicht */}
-      <div className={`${CARD} p-6`}>
+      <section data-rail="Eingabe" className="space-y-6">
+      <Reveal className={`${CARD} p-6`}>
         <p className="flex items-center gap-1.5 text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-4">
           <Scale className="w-3.5 h-3.5" />
           Heutiges Körpergewicht
@@ -491,10 +499,10 @@ export default function CalorieTracker({
             {isWeightPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Speichern'}
           </button>
         </div>
-      </div>
+      </Reveal>
 
       {/* Essens-Eingabe */}
-      <div className={`${CARD} p-6`}>
+      <Reveal className={`${CARD} p-6`}>
         <p className="flex items-center gap-1.5 text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-4">
           <Utensils className="w-3.5 h-3.5" />
           Was hast du gegessen?
@@ -512,7 +520,7 @@ export default function CalorieTracker({
           <button
             onClick={handleSubmit}
             disabled={isPending || !foodText.trim()}
-            className="self-end disabled:opacity-30 bg-blaze text-black text-sm font-bold px-4 py-2.5 rounded-none transition-all active:scale-[0.98] whitespace-nowrap"
+            className="self-end disabled:opacity-30 bg-blaze text-black font-mono text-[11px] font-bold uppercase tracking-[0.15em] px-4 py-3 rounded-none transition-all active:scale-[0.98] whitespace-nowrap"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
@@ -552,10 +560,12 @@ export default function CalorieTracker({
             )}
           </div>
         )}
-      </div>
+      </Reveal>
+      </section>
 
       {/* 30-Tage Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <section data-rail="Verlauf">
+      <Reveal variant="stagger" className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className={`${CARD} p-6`}>
           <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">Kalorien</p>
           <p className="text-sm font-bold tracking-tight text-chalk mb-5">Letzte 30 Tage</p>
@@ -566,7 +576,8 @@ export default function CalorieTracker({
           <p className="text-sm font-bold tracking-tight text-chalk mb-5">Letzte 30 Tage</p>
           <WeightChart data={weightHistory} />
         </div>
-      </div>
+      </Reveal>
+      </section>
     </div>
   )
 }

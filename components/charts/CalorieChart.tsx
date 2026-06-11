@@ -59,7 +59,7 @@ export default function CalorieChart({ data }: Props) {
           labelFormatter={(d) => formatDate(d as string)}
           formatter={(v) => [`${v} kcal`, 'Kalorien']}
         />
-        <Bar dataKey="kcal" radius={[3, 3, 0, 0]}>
+        <Bar dataKey="kcal" radius={0}>
           {data.map((_, i) => (
             <Cell
               key={i}

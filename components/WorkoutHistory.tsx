@@ -14,6 +14,7 @@ import {
   BookOpen, ChevronDown, ChevronUp, Pencil, Trash2, Check, X,
   Loader2, Plus, CalendarDays,
 } from 'lucide-react'
+import Reveal from '@/components/Reveal'
 import type { Exercise, WorkoutDetail, WorkoutLogDetail } from '@/lib/types'
 
 interface WorkoutRecord { id: string; date: string; split_name: string; set_count: number }
@@ -346,9 +347,9 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
           </div>
         </div>
       ) : (
-        <div className="space-y-2">
+        <Reveal variant="stagger" className="space-y-2">
           {history.map((w) => (
-            <div key={w.id} className={`${CARD} overflow-hidden`}>
+            <div key={w.id} className={`${CARD} overflow-hidden transition-colors hover:border-chalk/25`}>
               <div className="px-5 py-4 flex items-center gap-4">
                 <button
                   onClick={() => handleExpand(w.id)}
@@ -357,7 +358,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
                   <span className="text-[11px] font-semibold font-mono uppercase tracking-[0.12em] text-chalk/35 tabular-nums shrink-0 w-28">
                     {formatDateDE(w.date)}
                   </span>
-                  <span className="text-sm font-bold tracking-tight text-chalk truncate">{w.split_name}</span>
+                  <span className="font-display text-lg uppercase leading-none text-chalk truncate">{w.split_name}</span>
                   <span className="text-[11px] font-medium font-mono uppercase tracking-[0.12em] text-chalk/30 shrink-0 ml-auto">
                     {w.set_count} Sätze
                   </span>
@@ -496,7 +497,7 @@ export default function WorkoutHistory({ initialHistory, exercises }: Props) {
               )}
             </div>
           ))}
-        </div>
+        </Reveal>
       )}
     </div>
   )

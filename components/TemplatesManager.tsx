@@ -120,14 +120,17 @@ export default function TemplatesManager({ exercises, initialTemplates }: Props)
             <div
               key={t.id}
               onClick={() => setSelectedTemplateId(t.id)}
-              className={`group flex items-center justify-between px-4 py-3.5 rounded-none border cursor-pointer transition-all ${
+              className={`group relative flex items-center justify-between px-4 py-3.5 rounded-none border cursor-pointer transition-all ${
                 selectedTemplateId === t.id
-                  ? 'bg-asphalt border-blaze/30 text-chalk'
+                  ? 'bg-asphalt border-blaze/40 text-chalk pl-5'
                   : 'bg-rubber border-chalk/10 text-chalk/40 hover:border-chalk/25 hover:text-chalk'
               }`}
             >
+              {selectedTemplateId === t.id && (
+                <span className="absolute inset-y-0 left-0 w-[3px] bg-blaze" />
+              )}
               <div>
-                <span className="text-sm font-bold tracking-tight">{t.name}</span>
+                <span className="font-display text-base uppercase leading-none">{t.name}</span>
                 <p className="text-[10px] font-semibold font-mono uppercase tracking-[0.15em] text-chalk/30 mt-0.5">
                   {t.template_exercises?.length ?? 0} Übungen
                 </p>

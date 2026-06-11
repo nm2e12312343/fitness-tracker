@@ -19,8 +19,8 @@ export default function CountUp({ value, decimals = 0, duration = 1400, classNam
     const el = ref.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplay(value)
-      return
+      const raf = requestAnimationFrame(() => setDisplay(value))
+      return () => cancelAnimationFrame(raf)
     }
     const io = new IntersectionObserver(
       ([entry]) => {

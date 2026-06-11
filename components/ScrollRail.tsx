@@ -14,7 +14,6 @@ export default function ScrollRail() {
 
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>('[data-rail]'))
-    setSections(els.map((el) => el.dataset.rail ?? ''))
 
     let raf = 0
     const measure = () => {
@@ -31,7 +30,10 @@ export default function ScrollRail() {
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure)
     }
-    measure()
+    raf = requestAnimationFrame(() => {
+      setSections(els.map((el) => el.dataset.rail ?? ''))
+      measure()
+    })
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => {

@@ -58,32 +58,38 @@ export default async function ProgressPage() {
         </h1>
       </header>
 
-      <Reveal variant="stagger" className="grid grid-cols-2 lg:grid-cols-4 gap-px border border-chalk/15 bg-chalk/15">
-        <StatCard label="Workouts" value={totalWorkouts} unit="" />
-        <StatCard label="Gesamtvolumen" value={totalVolume / 1000} decimals={1} unit="t" />
-        <StatCard label="Bestes 1RM" value={maxOneRM} unit="kg" />
-        <StatCard label="Körpergewicht" value={latestWeight} decimals={1} unit={latestWeight ? 'kg' : ''} />
-      </Reveal>
+      <section data-rail="Bilanz">
+        <Reveal variant="stagger" className="grid grid-cols-2 lg:grid-cols-4 gap-px border border-chalk/15 bg-chalk/15">
+          <StatCard label="Workouts" value={totalWorkouts} unit="" />
+          <StatCard label="Gesamtvolumen" value={totalVolume / 1000} decimals={1} unit="t" />
+          <StatCard label="Bestes 1RM" value={maxOneRM} unit="kg" />
+          <StatCard label="Körpergewicht" value={latestWeight} decimals={1} unit={latestWeight ? 'kg' : ''} />
+        </Reveal>
+      </section>
 
-      <Reveal className={`${CARD} p-6`}>
-        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
-          Trainingsvolumen & 1RM
-        </p>
-        <p className="text-sm font-bold tracking-tight text-chalk mb-5">
-          Volumen pro Tag & Epley-1RM-Schätzung
-        </p>
-        <VolumeChart data={volumeData} />
-      </Reveal>
+      <section data-rail="Volumen">
+        <Reveal className={`${CARD} p-6`}>
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
+            Trainingsvolumen & 1RM
+          </p>
+          <p className="text-sm font-bold tracking-tight text-chalk mb-5">
+            Volumen pro Tag & Epley-1RM-Schätzung
+          </p>
+          <VolumeChart data={volumeData} />
+        </Reveal>
+      </section>
 
-      <Reveal className={`${CARD} p-6`}>
-        <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
-          Körpergewicht
-        </p>
-        <p className="text-sm font-bold tracking-tight text-chalk mb-5">
-          Verlauf in kg
-        </p>
-        <WeightChart data={weightHistory} />
-      </Reveal>
+      <section data-rail="Gewicht">
+        <Reveal className={`${CARD} p-6`}>
+          <p className="text-[11px] font-semibold font-mono uppercase tracking-[0.25em] text-chalk/40 mb-1">
+            Körpergewicht
+          </p>
+          <p className="text-sm font-bold tracking-tight text-chalk mb-5">
+            Verlauf in kg
+          </p>
+          <WeightChart data={weightHistory} />
+        </Reveal>
+      </section>
     </div>
   )
 }

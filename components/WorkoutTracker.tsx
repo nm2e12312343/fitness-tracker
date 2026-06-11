@@ -266,21 +266,26 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {templates.map((t) => (
+            <div>
+              {templates.map((t, i) => (
                 <button
                   key={t.id}
                   onClick={() => handleSelectTemplate(t)}
-                  className="group flex items-center justify-between px-5 py-4 rounded-none border border-chalk/10 bg-asphalt hover:border-chalk/30 text-left transition-all"
+                  className="group flex w-full items-center justify-between gap-4 border-b border-chalk/10 px-2 py-4 text-left transition-all duration-300 first:border-t hover:bg-blaze hover:pl-5"
                 >
-                  <div>
-                    <div className="text-sm font-bold tracking-tight text-chalk">{t.name}</div>
-                    <div className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/35 mt-1">
-                      {t.template_exercises?.length ?? 0} Übungen
-                    </div>
+                  <div className="flex min-w-0 items-baseline gap-4">
+                    <span className="font-mono text-xs text-blaze transition-colors group-hover:text-black">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="truncate font-display text-2xl uppercase leading-none text-chalk transition-colors group-hover:text-black sm:text-3xl">
+                      {t.name}
+                    </span>
                   </div>
-                  <div className="w-9 h-9 rounded-none bg-press border border-chalk/10 flex items-center justify-center group-hover:border-blaze/40 group-hover:bg-blaze/10 transition-all">
-                    <Timer className="w-4 h-4 text-chalk/40 group-hover:text-blaze transition-colors" />
+                  <div className="flex shrink-0 items-center gap-4">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-chalk/35 transition-colors group-hover:text-black/70">
+                      {t.template_exercises?.length ?? 0} Übungen
+                    </span>
+                    <Timer className="h-4 w-4 text-chalk/30 transition-colors group-hover:text-black" />
                   </div>
                 </button>
               ))}
@@ -340,9 +345,12 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
             {activeTemplate.name}<span className="text-blaze">.</span>
           </h1>
         </div>
-        <div className="flex items-center gap-2 bg-rubber border border-chalk/10 rounded-none px-5 py-3">
-          <Timer className="w-3.5 h-3.5 text-chalk/30" />
-          <span className="text-2xl font-bold font-mono tracking-tighter text-chalk tabular-nums">{timerStr}</span>
+        <div className="flex items-center gap-3 border border-blaze/30 bg-rubber px-5 py-3">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blaze opacity-60 motion-reduce:hidden" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-blaze" />
+          </span>
+          <span className="font-display text-3xl leading-none text-chalk tabular-nums">{timerStr}</span>
         </div>
       </div>
 
@@ -350,9 +358,10 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
       {exerciseSessions.map((s, exIdx) => (
         <div key={s.exercise.id} className={`${CARD} overflow-hidden`}>
           <div className="px-5 py-4 border-b border-chalk/5 flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <span className="font-bold tracking-tight text-chalk">{s.exercise.name}</span>
-              <span className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/35 ml-3">
+            <div className="flex items-baseline gap-3 min-w-0">
+              <span className="font-mono text-xs text-blaze shrink-0">{String(exIdx + 1).padStart(2, '0')}</span>
+              <span className="font-display text-xl uppercase leading-none text-chalk truncate">{s.exercise.name}</span>
+              <span className="text-[11px] font-medium font-mono uppercase tracking-[0.15em] text-chalk/35 shrink-0">
                 {s.exercise.category}
               </span>
             </div>
@@ -431,7 +440,7 @@ export default function WorkoutTracker({ exercises: allExercises, templates }: P
         <button
           onClick={handleFinish}
           disabled={isSaving}
-          className="w-full py-3.5 rounded-none font-bold text-sm flex items-center justify-center gap-2 transition-all bg-blaze text-black disabled:opacity-50 active:scale-[0.99]"
+          className="w-full py-4 rounded-none font-mono text-[12px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all bg-blaze text-black disabled:opacity-50 active:scale-[0.99]"
         >
           {isSaving
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Wird gespeichert...</>

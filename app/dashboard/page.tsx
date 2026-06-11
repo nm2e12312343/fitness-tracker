@@ -76,7 +76,7 @@ export default async function DashboardPage() {
             {dateStr} — Übersicht
           </p>
           <h1 className="mt-4 font-display text-[clamp(56px,11vw,130px)] uppercase leading-[0.85] text-chalk">
-            Dranbleiben,
+            <span className="text-outline">Dranbleiben,</span>
             <br />
             {firstName}
             <span className="text-blaze">.</span>
@@ -90,8 +90,22 @@ export default async function DashboardPage() {
         </Reveal>
       </section>
 
+      {/* ── Stadium ticker: live data crawl, full-bleed ──────────────── */}
+      <Ticker
+        items={[
+          `Kcal heute ${todayTotals.kcal}`,
+          `Protein ${todayTotals.protein}g`,
+          `Carbs ${todayTotals.carbs}g`,
+          `Fett ${todayTotals.fat}g`,
+          `Habits ${habitSummary.done}/${habitSummary.total}`,
+          recentWorkout ? `Zuletzt ${recentWorkout.split_name}` : 'Noch kein Training',
+          dateStr,
+        ]}
+      />
+
       {/* ── 01 / Bilanz ──────────────────────────────────────────────── */}
-      <section data-rail="Bilanz" className="border-t border-chalk/15 py-20">
+      <section data-rail="Bilanz" className="relative overflow-hidden border-t border-chalk/15 py-20">
+        <span aria-hidden className="ghost-num">01</span>
         <SectionHead n="01" title="Bilanz heute" />
         <Reveal>
           <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
@@ -134,7 +148,8 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── 02 / Training ────────────────────────────────────────────── */}
-      <section data-rail="Training" className="border-t border-chalk/15 py-20">
+      <section data-rail="Training" className="relative overflow-hidden border-t border-chalk/15 py-20">
+        <span aria-hidden className="ghost-num">02</span>
         <SectionHead n="02" title="Training & Habits" />
         <Reveal variant="stagger" className="grid gap-px bg-chalk/15 sm:grid-cols-2 border border-chalk/15">
           <div className="flex min-h-[220px] flex-col justify-between bg-rubber p-7">
@@ -177,14 +192,15 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── 03 / Stationen ───────────────────────────────────────────── */}
-      <section data-rail="Stationen" className="border-t border-chalk/15 py-20">
+      <section data-rail="Stationen" className="relative overflow-hidden border-t border-chalk/15 py-20">
+        <span aria-hidden className="ghost-num">03</span>
         <SectionHead n="03" title="Stationen" />
         <Reveal variant="stagger">
           {stations.map(({ n, href, label, desc }) => (
             <Link
               key={href}
               href={href}
-              className="group flex items-center justify-between gap-4 border-b border-chalk/15 px-2 py-5 transition-colors first:border-t hover:bg-blaze"
+              className="group relative flex items-center justify-between gap-4 border-b border-chalk/15 px-2 py-5 transition-all duration-300 first:border-t hover:bg-blaze hover:pl-6"
             >
               <div className="flex min-w-0 items-baseline gap-5">
                 <span className="font-mono text-xs text-blaze transition-colors group-hover:text-black">
@@ -207,6 +223,29 @@ export default async function DashboardPage() {
           Fittrack — {new Date().getFullYear()}
         </p>
       </section>
+    </div>
+  )
+}
+
+function Ticker({ items }: { items: string[] }) {
+  const row = (hidden: boolean) => (
+    <span aria-hidden={hidden || undefined} className="inline-flex items-center">
+      {items.map((item, i) => (
+        <span key={i} className="inline-flex items-center">
+          <span className="px-6 font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-chalk/60">
+            {item}
+          </span>
+          <span className="text-blaze">●</span>
+        </span>
+      ))}
+    </span>
+  )
+  return (
+    <div className="ticker relative left-1/2 w-screen -translate-x-1/2 border-y border-chalk/15 py-3">
+      <div className="ticker-track">
+        {row(false)}
+        {row(true)}
+      </div>
     </div>
   )
 }

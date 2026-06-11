@@ -25,7 +25,8 @@ export default function Reveal({ children, variant = 'up', delay = 0, className 
           io.disconnect()
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+      // low threshold: tall elements (long lists) can never reach high ratios
+      { threshold: 0.05, rootMargin: '0px 0px -8% 0px' }
     )
     io.observe(el)
     return () => io.disconnect()

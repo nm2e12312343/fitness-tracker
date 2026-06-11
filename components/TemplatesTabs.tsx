@@ -24,7 +24,7 @@ export default function TemplatesTabs({ activeTab }: Props) {
         >
           {t.label}
           {activeTab === t.id && (
-            <span className="absolute bottom-0 left-0 right-0 h-px bg-blaze" />
+            <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blaze" />
           )}
         </Link>
       ))}

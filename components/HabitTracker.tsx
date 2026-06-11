@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { toggleHabitLog, createHabit, archiveHabit } from '@/lib/actions/habits'
 import { Check, Flame, Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import Reveal from '@/components/Reveal'
 import type { HabitWithLogs } from '@/lib/types'
 
 const COLORS = [
@@ -192,7 +193,7 @@ export default function HabitTracker({ habits: init, today }: Props) {
 
       {/* Habit list */}
       {habits.length > 0 && (
-        <div className="space-y-2">
+        <Reveal variant="stagger" className="space-y-2">
           {habits.map((habit) => (
             <HabitCard
               key={habit.id}
@@ -204,7 +205,7 @@ export default function HabitTracker({ habits: init, today }: Props) {
               onArchive={() => archive(habit.id)}
             />
           ))}
-        </div>
+        </Reveal>
       )}
     </div>
   )
@@ -239,14 +240,14 @@ function HabitCard({
         )}
 
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-chalk leading-tight truncate">{habit.name}</p>
+          <p className="font-display text-lg uppercase leading-none text-chalk truncate">{habit.name}</p>
           {habit.streak > 0 ? (
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-chalk/40">
+            <p className="mt-1.5 flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.15em] text-chalk/40">
               <Flame className="h-3 w-3" style={{ color: habit.color }} />
               {habit.streak} Tag{habit.streak !== 1 ? 'e' : ''} am Stück
             </p>
           ) : (
-            <p className="mt-0.5 text-xs text-chalk/25">Noch kein Streak</p>
+            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-chalk/25">Noch kein Streak</p>
           )}
         </div>
 
